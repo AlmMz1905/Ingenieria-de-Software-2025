@@ -1,5 +1,5 @@
 # Ingenieria-de-Software-2025
-# Integrante:
+# Integrantes:
     - Alam Meza
     - Micaela Taini
     - Rocio Pascual
