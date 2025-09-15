@@ -11,7 +11,7 @@ Nacimos de la visión compartida de que la tecnología debe ser una herramienta 
 ## **Proyecto**: NombredelaApp
 // Descripcion de la aplicacion aun no implementado
 ## 👨👩Colaboradores:
-- [Alam Meza](https://github.com/AlmMz1905)>
+- [Alam Meza](https://github.com/AlmMz1905)
 - Micaela Taini
 - Rocio Pascual
 - Manuel Toledo
