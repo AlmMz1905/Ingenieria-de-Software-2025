@@ -1,13 +1,7 @@
 # 💻**Ingenieria-de-Software-2025**
-# Somos RAMM
-   Claro, aquí tienes una presentación para "RAMM", una empresa ficticia de desarrollo de aplicaciones compuesta por cuatro personas.
-
-Presentación de RAMM: Desarrollo Innovador a tu Medida
-(Diapositiva 1: Título)
-
 ## **RAMM**
 ### Innovación, Diseño y Desarrollo a tu Alcance.
-[![Logo Empresarial](C:\Users\alame\Documents\GitHub\Ingenieria-de-Software-2025\Documentación\Empresa "Logo RAMM")]
+[![Logo Empresarial](Documentación/Empresa "Logo RAMM")]
 Somos RAMM, un equipo de cuatro apasionados por la tecnología, especializados en convertir ideas en aplicaciones móviles y web funcionales, intuitivas y de alto impacto.
 Nacimos de la visión compartida de que la tecnología debe ser una herramienta para simplificar, potenciar y conectar. Aunque somos un equipo compacto, nuestra agilidad y dedicación nos permiten ofrecer soluciones personalizadas y de alta calidad, compitiendo con los mejores del sector.
 **Nuestra Misión**: Crear soluciones de software excepcionales que impulsen el crecimiento de nuestros clientes y mejoren la vida de sus usuarios.
