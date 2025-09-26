@@ -9,6 +9,7 @@ Nacimos de la visión compartida de que la tecnología debe ser una herramienta 
 **Nuestra Misión**: Crear soluciones de software excepcionales que impulsen el crecimiento de nuestros clientes y mejoren la vida de sus usuarios.
 
 **Nuestra Visión**: Ser el socio tecnológico de referencia para startups y empresas en crecimiento que buscan innovación, calidad y un servicio cercano y confiable.
+
 ## **Proyecto**: NombredelaApp
 // Descripcion de la aplicacion aun no implementado
 ## 👨👩Colaboradores:
