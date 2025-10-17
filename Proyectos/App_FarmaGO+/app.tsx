@@ -1,0 +1,1 @@
+type AuthView = "login" | "register" | "app";

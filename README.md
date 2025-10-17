@@ -18,6 +18,5 @@ Nacimos de la visión compartida de que la tecnología debe ser una herramienta 
 - Rocio Pascual
 - Manuel Toledo
 # 🔧Tecnologías Utilizadas
-- Python
 ## Front-End
 ## Back-End
