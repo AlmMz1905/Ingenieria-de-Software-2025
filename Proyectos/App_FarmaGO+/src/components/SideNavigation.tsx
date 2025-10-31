@@ -7,17 +7,42 @@ import {
   Map, 
   BarChart3, 
   Users, 
-  Settings 
+  Settings,
+  Package,
+  Star
 } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface SideNavigationProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  userType?: string;
 }
 
-export function SideNavigation({ activeSection, onSectionChange }: SideNavigationProps) {
-  const menuItems = [
+export function SideNavigation({ activeSection, onSectionChange, userType }: SideNavigationProps) {
+  // Menú para Repartidor
+  const deliveryMenuItems = [
+    { id: "home", label: "Home", icon: Home },
+    { id: "delivery-orders", label: "Pedidos", icon: Package },
+    { id: "inventory", label: "Mapa", icon: Map },
+    { id: "delivery-chat", label: "Chat", icon: MessageSquare },
+    { id: "ratings", label: "Calificación", icon: Star },
+    { id: "users", label: "Users", icon: Users },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  // Menú para Empleado de Farmacia
+  const pharmacyMenuItems = [
+    { id: "home", label: "Home", icon: Home },
+    { id: "uploaded-recipes", label: "Recetas Cargadas", icon: FileText },
+    { id: "pharmacy-chat", label: "Chats", icon: MessageSquare },
+    { id: "pharmacy-ratings", label: "Calificación", icon: Star },
+    { id: "users", label: "Users", icon: Users },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  // Menú para Cliente (original)
+  const clientMenuItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "sales", label: "Carrito", icon: ShoppingCart },
     { id: "products", label: "Mis recetas", icon: FileText },
@@ -28,6 +53,14 @@ export function SideNavigation({ activeSection, onSectionChange }: SideNavigatio
     { id: "users", label: "Users", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
+
+  // Seleccionar menú según tipo de usuario
+  let menuItems = clientMenuItems;
+  if (userType === "repartidor") {
+    menuItems = deliveryMenuItems;
+  } else if (userType === "empleado") {
+    menuItems = pharmacyMenuItems;
+  }
 
   return (
     <div className="w-64 bg-gradient-to-b from-emerald-50 to-teal-50 border-r border-emerald-200 h-full flex flex-col shadow-sm">

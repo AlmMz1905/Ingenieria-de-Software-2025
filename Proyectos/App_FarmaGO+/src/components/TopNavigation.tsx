@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Bell, ChevronDown, User, Settings, CreditCard, LogOut, HelpCircle } from "lucide-react";
@@ -9,13 +10,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { NotificationsPanel } from "./NotificationsPanel";
 import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface TopNavigationProps {
   onLogout?: () => void;
+  onNavigate?: (section: string) => void;
 }
 
-export function TopNavigation({ onLogout }: TopNavigationProps) {
+export function TopNavigation({ onLogout, onNavigate }: TopNavigationProps) {
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const handleNavigate = (section: string) => {
+    if (onNavigate) {
+      onNavigate(section);
+    }
+  };
+
   return (
     <div className="h-16 bg-white border-b border-emerald-200 flex items-center justify-between px-6 shadow-sm">
       <div className="flex items-center space-x-3">
@@ -28,12 +39,22 @@ export function TopNavigation({ onLogout }: TopNavigationProps) {
       </div>
       
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="sm" className="relative hover:bg-emerald-50">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="relative hover:bg-emerald-50"
+          onClick={() => setNotificationsOpen(!notificationsOpen)}
+        >
           <Bell className="h-5 w-5 text-emerald-700" />
           <span className="absolute -top-1 -right-1 h-4 w-4 bg-emerald-500 text-white rounded-full text-xs flex items-center justify-center">
             3
           </span>
         </Button>
+
+        <NotificationsPanel 
+          isOpen={notificationsOpen} 
+          onClose={() => setNotificationsOpen(false)} 
+        />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -51,15 +72,15 @@ export function TopNavigation({ onLogout }: TopNavigationProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigate('users')}>
               <User className="mr-2 h-4 w-4" />
               <span>Perfil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigate('settings')}>
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Métodos de Pago</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigate('settings')}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Configuración</span>
             </DropdownMenuItem>

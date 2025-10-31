@@ -3,23 +3,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Mail, Lock, Eye, EyeOff, UserCircle } from "lucide-react";
 import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface LoginScreenProps {
-  onLogin: () => void;
+  onLogin: (accountType: string) => void;
   onSwitchToRegister: () => void;
 }
 
 export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accountType, setAccountType] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simular inicio de sesión
-    onLogin();
+    // Simular inicio de sesión y pasar el tipo de cuenta
+    onLogin(accountType);
   };
 
   return (
@@ -92,6 +94,28 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
                 </div>
               </div>
 
+              {/* Account Type */}
+              <div className="space-y-2">
+                <Label htmlFor="accountType">Tipo de Cuenta</Label>
+                <div className="relative">
+                  <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
+                  <Select
+                    value={accountType}
+                    onValueChange={setAccountType}
+                    required
+                  >
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder="Selecciona tu tipo de cuenta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cliente">Cliente</SelectItem>
+                      <SelectItem value="repartidor">Repartidor</SelectItem>
+                      <SelectItem value="empleado">Empleado de Farmacia</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Forgot Password */}
               <div className="flex justify-end">
                 <Button
@@ -108,6 +132,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
                 type="submit"
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
                 size="lg"
+                disabled={!accountType}
               >
                 Iniciar Sesión
               </Button>
@@ -125,14 +150,14 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
               {/* Register Link */}
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  ¿No tienes una cuenta creada?{" "}
+                  ¿No tenes una cuenta?{" "}
                   <Button
                     type="button"
                     variant="link"
                     className="p-0 h-auto text-emerald-600 hover:text-emerald-700 font-semibold"
                     onClick={onSwitchToRegister}
                   >
-                    Registrarse
+                    Registra una nueva aquí
                   </Button>
                 </p>
               </div>
