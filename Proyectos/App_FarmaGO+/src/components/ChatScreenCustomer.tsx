@@ -14,7 +14,7 @@ export function ChatScreenCustomer() {
   const conversations = [
     {
       id: 1,
-      name: "Consulta Farmacéutica (General)",
+      name: "Consulta de Medicamentos (General)",
       status: "Online",
       lastMessage: "¿En qué puedo ayudarte?",
       timestamp: "10:30",
@@ -197,8 +197,8 @@ export function ChatScreenCustomer() {
     <div className="flex-1 p-6 space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
-        <h2 className="text-3xl font-semibold mb-2">Chat con Farmacias</h2>
-        <p className="text-emerald-50">Consulta con farmacéuticos y envía tus recetas</p>
+        <h2 className="text-3xl font-semibold mb-2">Consultas con Farmacia</h2>
+        <p className="text-emerald-50">Consulta sobre medicamentos y envía tus recetas</p>
       </div>
 
       {/* Conversations List */}
@@ -258,7 +258,7 @@ export function ChatScreenCustomer() {
             <div>
               <h4 className="font-semibold text-blue-900 mb-1">¿Necesitás ayuda?</h4>
               <p className="text-sm text-gray-700">
-                Chatea con farmacéuticos profesionales y envía fotos de tus recetas 
+                Consulta sobre medicamentos y envía fotos de tus recetas 
                 para obtener cotizaciones al instante.
               </p>
             </div>

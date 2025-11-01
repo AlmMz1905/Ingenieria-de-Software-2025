@@ -18,7 +18,6 @@ import { RatingsScreen } from "./components/RatingsScreen";
 import { UploadedRecipesScreen } from "./components/UploadedRecipesScreen";
 import { PharmacyRatingsScreen } from "./components/PharmacyRatingsScreen";
 import { SettingsScreen } from "./components/SettingsScreen";
-import { UsersScreen } from "./components/UsersScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
 
@@ -64,8 +63,6 @@ export default function App() {
           return <ChatScreenDelivery />;
         case "ratings":
           return <RatingsScreen />;
-        case "users":
-          return <UsersScreen />;
         case "settings":
           return <SettingsScreen />;
         default:
@@ -84,8 +81,6 @@ export default function App() {
           return <ChatScreenPharmacy />;
         case "pharmacy-ratings":
           return <PharmacyRatingsScreen />;
-        case "users":
-          return <UsersScreen />;
         case "settings":
           return <SettingsScreen />;
         default:
@@ -107,15 +102,6 @@ export default function App() {
         return <ChatScreenCustomer />;
       case "inventory":
         return <MapScreenCustomer />;
-      case "reports":
-        return (
-          <div className="flex-1 p-6">
-            <h2 className="text-2xl font-semibold mb-4">Reports & Analytics</h2>
-            <p className="text-gray-600">Reports and analytics features coming soon...</p>
-          </div>
-        );
-      case "users":
-        return <UsersScreen />;
       case "settings":
         return <SettingsScreen />;
       default:

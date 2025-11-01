@@ -27,7 +27,6 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "inventory", label: "Mapa", icon: Map },
     { id: "delivery-chat", label: "Chat", icon: MessageSquare },
     { id: "ratings", label: "Calificación", icon: Star },
-    { id: "users", label: "Users", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -37,7 +36,6 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "uploaded-recipes", label: "Recetas Cargadas", icon: FileText },
     { id: "pharmacy-chat", label: "Chats", icon: MessageSquare },
     { id: "pharmacy-ratings", label: "Calificación", icon: Star },
-    { id: "users", label: "Users", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -47,11 +45,9 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "sales", label: "Carrito", icon: ShoppingCart },
     { id: "products", label: "Mis recetas", icon: FileText },
     { id: "upload-recipe", label: "Cargar Receta", icon: Upload },
-    { id: "pharmacy-chat", label: "Chat con Farmacias", icon: MessageSquare },
+    { id: "settings", label: "Mi Cuenta", icon: Settings },
     { id: "inventory", label: "Mapa", icon: Map },
     { id: "reports", label: "Opiniones", icon: BarChart3 },
-    { id: "users", label: "Users", icon: Users },
-    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   // Seleccionar menú según tipo de usuario
@@ -66,8 +62,8 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     <div className="w-64 bg-gradient-to-b from-emerald-50 to-teal-50 border-r border-emerald-200 h-full flex flex-col shadow-sm">
       <div className="p-6">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
-            <ShoppingCart className="h-5 w-5 text-white" />
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md text-white font-bold">
+            F+
           </div>
           <span className="font-semibold text-emerald-900">¡Hola!</span>
         </div>
