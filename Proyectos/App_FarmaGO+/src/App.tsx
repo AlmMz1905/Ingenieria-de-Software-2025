@@ -2,27 +2,26 @@ import { useState } from "react";
 import { TopNavigation } from "./components/TopNavigation";
 import { SideNavigation } from "./components/SideNavigation";
 import { DashboardScreen } from "./components/DashboardScreen";
-import { DeliveryDashboard } from "./components/DeliveryDashboard";
 import { PharmacyDashboard } from "./components/PharmacyDashboard";
 import { SalesScreen } from "./components/SalesScreen";
 import { RecipesScreen } from "./components/RecipesScreen";
 import { UploadRecipeScreen } from "./components/UploadRecipeScreen";
 import { MapScreenCustomer } from "./components/MapScreenCustomer";
 import { MapScreenPharmacy } from "./components/MapScreenPharmacy";
-import { MapScreenDelivery } from "./components/MapScreenDelivery";
 import { ChatScreenCustomer } from "./components/ChatScreenCustomer";
 import { ChatScreenPharmacy } from "./components/ChatScreenPharmacy";
-import { ChatScreenDelivery } from "./components/ChatScreenDelivery";
-import { DeliveryOrdersScreen } from "./components/DeliveryOrdersScreen";
-import { RatingsScreen } from "./components/RatingsScreen";
+import { CustomerReviewsScreen } from "./components/CustomerReviewsScreen";
 import { UploadedRecipesScreen } from "./components/UploadedRecipesScreen";
 import { PharmacyRatingsScreen } from "./components/PharmacyRatingsScreen";
-import { SettingsScreen } from "./components/SettingsScreen";
+import { CustomerSettingsScreen } from "./components/CustomerSettingsScreen";
+import { PharmacySettingsScreen } from "./components/PharmacySettingsScreen";
+import { StockManagementScreen } from "./components/StockManagementScreen";
+import { UsersScreen } from "./components/UsersScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
 
 type AuthView = "login" | "register" | "app";
-type UserType = "cliente" | "repartidor" | "empleado" | "";
+type UserType = "cliente" | "empleado" | "";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState("home");
@@ -50,26 +49,6 @@ export default function App() {
   };
 
   const renderContent = () => {
-    // Contenido específico para repartidores
-    if (userType === "repartidor") {
-      switch (activeSection) {
-        case "home":
-          return <DeliveryDashboard onNavigate={setActiveSection} />;
-        case "delivery-orders":
-          return <DeliveryOrdersScreen />;
-        case "inventory":
-          return <MapScreenDelivery />;
-        case "delivery-chat":
-          return <ChatScreenDelivery />;
-        case "ratings":
-          return <RatingsScreen />;
-        case "settings":
-          return <SettingsScreen />;
-        default:
-          return <DeliveryDashboard onNavigate={setActiveSection} />;
-      }
-    }
-
     // Contenido específico para empleados de farmacia
     if (userType === "empleado") {
       switch (activeSection) {
@@ -77,12 +56,12 @@ export default function App() {
           return <PharmacyDashboard onNavigate={setActiveSection} />;
         case "uploaded-recipes":
           return <UploadedRecipesScreen />;
-        case "pharmacy-chat":
-          return <ChatScreenPharmacy />;
+        case "stock-management":
+          return <StockManagementScreen />;
         case "pharmacy-ratings":
           return <PharmacyRatingsScreen />;
         case "settings":
-          return <SettingsScreen />;
+          return <PharmacySettingsScreen />;
         default:
           return <PharmacyDashboard onNavigate={setActiveSection} />;
       }
@@ -98,14 +77,16 @@ export default function App() {
         return <RecipesScreen />;
       case "upload-recipe":
         return <UploadRecipeScreen />;
-      case "pharmacy-chat":
-        return <ChatScreenCustomer />;
       case "inventory":
         return <MapScreenCustomer />;
+      case "reviews":
+        return <CustomerReviewsScreen />;
+      case "users":
+        return <UsersScreen />;
       case "settings":
-        return <SettingsScreen />;
+        return <CustomerSettingsScreen />;
       default:
-        return <SalesScreen />;
+        return <DashboardScreen onNavigate={setActiveSection} />;
     }
   };
 
