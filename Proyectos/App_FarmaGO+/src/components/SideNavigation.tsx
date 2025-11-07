@@ -9,7 +9,8 @@ import {
   Users, 
   Settings,
   Package,
-  Star
+  Star,
+  PackageSearch
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -20,24 +21,12 @@ interface SideNavigationProps {
 }
 
 export function SideNavigation({ activeSection, onSectionChange, userType }: SideNavigationProps) {
-  // Menú para Repartidor
-  const deliveryMenuItems = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "delivery-orders", label: "Pedidos", icon: Package },
-    { id: "inventory", label: "Mapa", icon: Map },
-    { id: "delivery-chat", label: "Chat", icon: MessageSquare },
-    { id: "ratings", label: "Calificación", icon: Star },
-    { id: "users", label: "Users", icon: Users },
-    { id: "settings", label: "Settings", icon: Settings },
-  ];
-
   // Menú para Empleado de Farmacia
   const pharmacyMenuItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "uploaded-recipes", label: "Recetas Cargadas", icon: FileText },
-    { id: "pharmacy-chat", label: "Chats", icon: MessageSquare },
+    { id: "stock-management", label: "Gestión de Stock", icon: PackageSearch },
     { id: "pharmacy-ratings", label: "Calificación", icon: Star },
-    { id: "users", label: "Users", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -47,18 +36,15 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "sales", label: "Carrito", icon: ShoppingCart },
     { id: "products", label: "Mis recetas", icon: FileText },
     { id: "upload-recipe", label: "Cargar Receta", icon: Upload },
-    { id: "pharmacy-chat", label: "Chat con Farmacias", icon: MessageSquare },
     { id: "inventory", label: "Mapa", icon: Map },
-    { id: "reports", label: "Opiniones", icon: BarChart3 },
+    { id: "reviews", label: "Opiniones", icon: Star },
     { id: "users", label: "Users", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
   // Seleccionar menú según tipo de usuario
   let menuItems = clientMenuItems;
-  if (userType === "repartidor") {
-    menuItems = deliveryMenuItems;
-  } else if (userType === "empleado") {
+  if (userType === "empleado") {
     menuItems = pharmacyMenuItems;
   }
 

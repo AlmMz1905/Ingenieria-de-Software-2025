@@ -12,7 +12,7 @@ interface RegisterScreenProps {
   onSwitchToLogin: () => void;
 }
 
-type UserType = "cliente" | "repartidor" | "empleado" | "";
+type UserType = "cliente" | "empleado" | "";
 
 export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenProps) {
   const [step, setStep] = useState<1 | 2>(1);
@@ -64,13 +64,6 @@ export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenPr
       description: "Compra medicamentos y gestiona tus recetas",
       icon: ShoppingBag,
       color: "from-emerald-500 to-teal-500",
-    },
-    {
-      type: "repartidor" as UserType,
-      title: "Repartidor",
-      description: "Entrega pedidos y gana dinero",
-      icon: Truck,
-      color: "from-cyan-500 to-blue-500",
     },
     {
       type: "empleado" as UserType,
@@ -223,7 +216,6 @@ export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenPr
                     <span className="text-sm text-emerald-700">
                       Tipo de cuenta: <span className="font-semibold">
                         {formData.userType === "cliente" && "Cliente"}
-                        {formData.userType === "repartidor" && "Repartidor"}
                         {formData.userType === "empleado" && "Empleado de Farmacia"}
                       </span>
                     </span>

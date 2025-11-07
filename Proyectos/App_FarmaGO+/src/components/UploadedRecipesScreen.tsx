@@ -1,10 +1,28 @@
-import { FileText, User, Clock, CheckCircle, XCircle, Eye, Phone, Package, Calendar } from "lucide-react";
+import { FileText, User, Clock, CheckCircle, XCircle, Eye, Phone, Package, Calendar, ZoomIn, ZoomOut, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export function UploadedRecipesScreen() {
+  const [validationModalOpen, setValidationModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [rejectionReason, setRejectionReason] = useState("");
+  
   const recipes = [
     {
       id: "REC-001",
@@ -109,6 +127,30 @@ export function UploadedRecipesScreen() {
     return recipes.filter(recipe => recipe.status === status);
   };
 
+  const handleOpenValidation = (recipe: any) => {
+    setSelectedRecipe(recipe);
+    setValidationModalOpen(true);
+    setZoomLevel(1);
+  };
+
+  const handleApprove = () => {
+    alert(`Receta ${selectedRecipe?.id} aprobada exitosamente`);
+    setValidationModalOpen(false);
+    setSelectedRecipe(null);
+  };
+
+  const handleReject = () => {
+    setValidationModalOpen(false);
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = () => {
+    alert(`Receta ${selectedRecipe?.id} rechazada. Razón: ${rejectionReason}`);
+    setRejectModalOpen(false);
+    setSelectedRecipe(null);
+    setRejectionReason("");
+  };
+
   const RecipeCard = ({ recipe }: { recipe: typeof recipes[0] }) => (
     <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all hover:shadow-lg">
       <CardHeader className="pb-3">
@@ -166,11 +208,23 @@ export function UploadedRecipesScreen() {
           <div className="flex gap-2">
             {recipe.status === "pending" && (
               <>
-                <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600">
+                <Button 
+                  size="sm" 
+                  className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+                  onClick={() => handleOpenValidation(recipe)}
+                >
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Procesar
                 </Button>
-                <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-50">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-red-300 text-red-700 hover:bg-red-50" 
+                  onClick={() => {
+                    setSelectedRecipe(recipe);
+                    handleReject();
+                  }}
+                >
                   <XCircle className="h-4 w-4 mr-1" />
                   Rechazar
                 </Button>
@@ -196,7 +250,12 @@ export function UploadedRecipesScreen() {
                 </Button>
               </>
             )}
-            <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              onClick={() => handleOpenValidation(recipe)}
+            >
               <Eye className="h-4 w-4 mr-1" />
               Ver
             </Button>
@@ -344,6 +403,189 @@ export function UploadedRecipesScreen() {
           ))}
         </TabsContent>
       </Tabs>
+
+      {/* Validation Modal - Full Screen with Two Panels */}
+      <Dialog open={validationModalOpen} onOpenChange={setValidationModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Validar Receta - {selectedRecipe?.id}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-6 h-[70vh]">
+            {/* Left Panel - Image */}
+            <div className="flex flex-col border-2 border-emerald-200 rounded-xl p-4 bg-gray-50">
+              <h4 className="font-semibold text-emerald-900 mb-3">Imagen de la Receta</h4>
+              <div className="flex-1 overflow-auto flex items-center justify-center bg-white rounded-lg border border-gray-200">
+                <ImageWithFallback
+                  src="https://images.unsplash.com/photo-1758691462814-485c3672e447?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVzY3JpcHRpb24lMjBtZWRpY2FsJTIwZG9jdW1lbnR8ZW58MXx8fHwxNzYyNTIzNzUzfDA&ixlib=rb-4.1.0&q=80&w=1080"
+                  alt="Receta Médica"
+                  className="max-w-full max-h-full object-contain"
+                  style={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.2s' }}
+                />
+              </div>
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-gray-600">{Math.round(zoomLevel * 100)}%</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setZoomLevel(Math.min(3, zoomLevel + 0.1))}
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Panel - Data & Actions */}
+            <div className="flex flex-col space-y-4">
+              <Card className="border-2 border-emerald-100">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Datos de la Receta</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-gray-600">Paciente</Label>
+                      <p className="font-medium">{selectedRecipe?.patientName}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">Teléfono</Label>
+                      <p className="font-medium">{selectedRecipe?.phone}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">Médico</Label>
+                      <p className="font-medium">{selectedRecipe?.doctor}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">Fecha de carga</Label>
+                      <p className="font-medium">{selectedRecipe?.uploadDate}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-600">Medicamentos</Label>
+                    <ul className="mt-1 space-y-1">
+                      {selectedRecipe?.medications.map((med: string, idx: number) => (
+                        <li key={idx} className="text-sm">• {med}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-600">Total</Label>
+                    <p className="text-lg font-semibold text-emerald-600">{selectedRecipe?.total}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-emerald-100 flex-1">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Acciones de Validación</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <h5 className="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
+                      Receta Válida
+                    </h5>
+                    <p className="text-sm text-gray-700 mb-3">
+                      La receta cumple con todos los requisitos y puede ser procesada.
+                    </p>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+                      onClick={handleApprove}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Aprobar Receta
+                    </Button>
+                  </div>
+
+                  <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                    <h5 className="font-semibold text-red-900 mb-2 flex items-center gap-2">
+                      <XCircle className="h-5 w-5" />
+                      Receta No Válida
+                    </h5>
+                    <p className="text-sm text-gray-700 mb-3">
+                      La receta tiene problemas que impiden su procesamiento.
+                    </p>
+                    <Button 
+                      variant="outline"
+                      className="w-full border-red-300 text-red-700 hover:bg-red-50"
+                      onClick={handleReject}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Rechazar Receta
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rejection Modal */}
+      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />
+              Motivo de Rechazo
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rejectionSelect">Seleccione el motivo</Label>
+              <Select value={rejectionReason} onValueChange={setRejectionReason}>
+                <SelectTrigger id="rejectionSelect" className="w-full mt-2">
+                  <SelectValue placeholder="Seleccione un motivo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="illegible">Foto Ilegible / Datos Incompletos</SelectItem>
+                  <SelectItem value="expired">Receta Vencida</SelectItem>
+                  <SelectItem value="unregistered">Médico No Registrado</SelectItem>
+                  <SelectItem value="invalid">Información Inválida</SelectItem>
+                  <SelectItem value="missing">Faltan Datos Obligatorios</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm text-red-700">
+                {rejectionReason === "illegible" && "La imagen no permite leer correctamente los datos de la receta."}
+                {rejectionReason === "expired" && "La receta ha superado su fecha de validez."}
+                {rejectionReason === "unregistered" && "El médico prescriptor no está registrado en el sistema."}
+                {rejectionReason === "invalid" && "La información proporcionada no es válida."}
+                {rejectionReason === "missing" && "Faltan datos obligatorios en la receta."}
+                {!rejectionReason && "Seleccione un motivo para continuar."}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => {
+                setRejectModalOpen(false);
+                setRejectionReason("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              className="flex-1 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600"
+              onClick={handleConfirmReject}
+              disabled={!rejectionReason}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Confirmar Rechazo
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
