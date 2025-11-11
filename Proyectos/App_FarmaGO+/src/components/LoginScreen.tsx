@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { Checkbox } from "./ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Mail, Lock, Eye, EyeOff, UserCircle } from "lucide-react";
 import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
@@ -10,13 +11,15 @@ import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.pn
 interface LoginScreenProps {
   onLogin: (accountType: string) => void;
   onSwitchToRegister: () => void;
+  onForgotPassword?: () => void;
 }
 
-export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
+export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: LoginScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accountType, setAccountType] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,12 +118,28 @@ export function LoginScreen({ onLogin, onSwitchToRegister }: LoginScreenProps) {
                 </div>
               </div>
 
+              {/* Remember Me */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                />
+                <Label 
+                  htmlFor="rememberMe" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Recordar mi sesión
+                </Label>
+              </div>
+
               {/* Forgot Password */}
               <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="link"
-                  className="p-0 h-auto text-sm text-emerald-600 hover:text-emerald-700"
+                  className="p-0 h-auto text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                  onClick={onForgotPassword}
                 >
                   ¿Has olvidado tu contraseña?
                 </Button>

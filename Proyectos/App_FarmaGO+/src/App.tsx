@@ -19,8 +19,11 @@ import { StockManagementScreen } from "./components/StockManagementScreen";
 import { UsersScreen } from "./components/UsersScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
+import { PasswordResetRequestScreen } from "./components/PasswordResetRequestScreen";
+import { PasswordResetEmailSentScreen } from "./components/PasswordResetEmailSentScreen";
+import { PasswordResetNewPasswordScreen } from "./components/PasswordResetNewPasswordScreen";
 
-type AuthView = "login" | "register" | "app";
+type AuthView = "login" | "register" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
 
 export default function App() {
@@ -28,6 +31,7 @@ export default function App() {
   const [authView, setAuthView] = useState<AuthView>("login");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<UserType>("");
+  const [resetEmail, setResetEmail] = useState("");
 
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
@@ -46,6 +50,24 @@ export default function App() {
     setAuthView("login");
     setActiveSection("home");
     setUserType("");
+  };
+
+  const handleForgotPassword = () => {
+    setAuthView("forgot-password");
+  };
+
+  const handleSendResetLink = (email: string) => {
+    setResetEmail(email);
+    setAuthView("reset-email-sent");
+  };
+
+  const handlePasswordReset = (newPassword: string) => {
+    alert("Contraseña restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.");
+    setAuthView("login");
+  };
+
+  const handleBackToLogin = () => {
+    setAuthView("login");
   };
 
   const renderContent = () => {
@@ -99,11 +121,33 @@ export default function App() {
           onSwitchToLogin={() => setAuthView("login")}
         />
       );
+    } else if (authView === "forgot-password") {
+      return (
+        <PasswordResetRequestScreen
+          onSendResetLink={handleSendResetLink}
+          onBackToLogin={handleBackToLogin}
+        />
+      );
+    } else if (authView === "reset-email-sent") {
+      return (
+        <PasswordResetEmailSentScreen
+          email={resetEmail}
+          onBackToLogin={handleBackToLogin}
+        />
+      );
+    } else if (authView === "reset-new-password") {
+      return (
+        <PasswordResetNewPasswordScreen
+          onPasswordReset={handlePasswordReset}
+          onBackToLogin={handleBackToLogin}
+        />
+      );
     }
     return (
       <LoginScreen
         onLogin={handleLogin}
         onSwitchToRegister={() => setAuthView("register")}
+        onForgotPassword={handleForgotPassword}
       />
     );
   }

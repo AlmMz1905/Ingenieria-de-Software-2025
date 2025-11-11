@@ -38,7 +38,6 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "upload-recipe", label: "Cargar Receta", icon: Upload },
     { id: "inventory", label: "Mapa", icon: Map },
     { id: "reviews", label: "Opiniones", icon: Star },
-    { id: "users", label: "Users", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 

@@ -20,7 +20,7 @@ export function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         <p className="text-emerald-50">Accesos rápidos a las funciones principales</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Card 1: Subir / Escanear receta */}
         <Card 
           className="border-2 border-emerald-200 hover:border-emerald-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
@@ -87,35 +87,6 @@ export function DashboardScreen({ onNavigate }: DashboardScreenProps) {
             </p>
             <div className="flex items-center text-sm text-cyan-600 font-medium">
               <span>Cambiar farmacia</span>
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Card 4: Chat / Consulta con farmacéutico */}
-        <Card 
-          className="border-2 border-emerald-200 hover:border-emerald-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
-          onClick={() => handleNavigate('pharmacy-chat')}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl flex items-center justify-center relative shadow-md">
-                <MessageSquare className="h-6 w-6 text-emerald-600" />
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-md">
-                  <span className="text-xs text-white font-semibold">2</span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-1 bg-emerald-50 px-2 py-1 rounded-full">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-emerald-700 font-medium">Online</span>
-              </div>
-            </div>
-            <h3 className="font-semibold text-emerald-900 mb-1">Consulta Farmacéutico</h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Chatea con un profesional
-            </p>
-            <div className="flex items-center text-sm text-emerald-600 font-medium">
-              <span>Abrir chat</span>
               <ChevronRight className="h-4 w-4 ml-1" />
             </div>
           </CardContent>
