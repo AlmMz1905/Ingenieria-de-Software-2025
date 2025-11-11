@@ -19,7 +19,6 @@ import { StockManagementScreen } from "./components/StockManagementScreen";
 import { UsersScreen } from "./components/UsersScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
-import { useEffect } from 'react';
 
 type AuthView = "login" | "register" | "app";
 type UserType = "cliente" | "empleado" | "";
@@ -67,13 +66,6 @@ export default function App() {
           return <PharmacyDashboard onNavigate={setActiveSection} />;
       }
     }
-    // Ejemplo en un componente de React
-    useEffect(() => {
-      fetch('http://localhost:8000/api/v1/test')
-      .then(response => response.json())
-      .then(data => console.log(data.message))
-      .catch(error => console.error("¡Error conectando!", error));
-    }, []);
 
     // Contenido para clientes
     switch (activeSection) {
