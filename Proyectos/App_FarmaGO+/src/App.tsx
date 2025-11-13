@@ -7,6 +7,10 @@ import { PharmacyDashboard } from "./components/PharmacyDashboard";
 import { SalesScreen } from "./components/SalesScreen";
 import { RecipesScreen } from "./components/RecipesScreen";
 import { UploadRecipeScreen } from "./components/UploadRecipeScreen";
+import { ProductCatalogScreen } from "./components/ProductCatalogScreen";
+import { CheckoutAddressScreen } from "./components/CheckoutAddressScreen";
+import { CheckoutPaymentScreen } from "./components/CheckoutPaymentScreen";
+import { OrderConfirmationScreen } from "./components/OrderConfirmationScreen";
 import { MapScreenCustomer } from "./components/MapScreenCustomer";
 import { MapScreenPharmacy } from "./components/MapScreenPharmacy";
 import { ChatScreenCustomer } from "./components/ChatScreenCustomer";
@@ -28,6 +32,7 @@ import { PasswordResetNewPasswordScreen } from "./components/PasswordResetNewPas
 
 type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
+type CheckoutStep = "address" | "payment" | "confirmation";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState("home");
@@ -37,6 +42,13 @@ export default function App() {
   const [userType, setUserType] = useState<UserType>("");
   const [resetEmail, setResetEmail] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
+  
+  // Checkout flow state
+  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("address");
+  const [selectedAddressId, setSelectedAddressId] = useState<number>(0);
+  const [orderId, setOrderId] = useState("");
+  const [orderTotal] = useState(2850.00); // Mock order total
+  const [deliveryFee] = useState(350.00); // Mock delivery fee
 
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
@@ -100,6 +112,47 @@ export default function App() {
     setAuthView("login");
   };
 
+  // Checkout flow handlers
+  const handleContinueToPayment = (addressId: number) => {
+    setSelectedAddressId(addressId);
+    setCheckoutStep("payment");
+  };
+
+  const handleBackToCart = () => {
+    setActiveSection("sales");
+    setCheckoutStep("address");
+  };
+
+  const handleBackToAddress = () => {
+    setCheckoutStep("address");
+  };
+
+  const handleConfirmPayment = (paymentMethodId: number) => {
+    // Generate order ID
+    const newOrderId = "#P-" + Math.floor(1000 + Math.random() * 9000);
+    setOrderId(newOrderId);
+    setCheckoutStep("confirmation");
+  };
+
+  const handleGoToOrders = () => {
+    setActiveSection("products");
+    setCheckoutStep("address");
+  };
+
+  const handleGoToHome = () => {
+    setActiveSection("home");
+    setCheckoutStep("address");
+  };
+
+  const handleNavigateToCart = () => {
+    setActiveSection("sales");
+  };
+
+  const handleProceedToCheckout = () => {
+    setActiveSection("checkout-address");
+    setCheckoutStep("address");
+  };
+
   const renderContent = () => {
     // Contenido específico para empleados de farmacia
     if (userType === "empleado") {
@@ -124,7 +177,26 @@ export default function App() {
       case "home":
         return <DashboardScreen onNavigate={setActiveSection} />;
       case "sales":
-        return <SalesScreen />;
+        return <SalesScreen onProceedToCheckout={handleProceedToCheckout} />;
+      case "catalog":
+        return <ProductCatalogScreen onNavigateToCart={handleNavigateToCart} />;
+      case "checkout-address":
+        return checkoutStep === "address" ? (
+          <CheckoutAddressScreen onContinue={handleContinueToPayment} onBack={handleBackToCart} />
+        ) : checkoutStep === "payment" ? (
+          <CheckoutPaymentScreen 
+            onConfirmPayment={handleConfirmPayment} 
+            onBack={handleBackToAddress}
+            orderTotal={orderTotal}
+            deliveryFee={deliveryFee}
+          />
+        ) : (
+          <OrderConfirmationScreen 
+            orderId={orderId} 
+            onGoToHome={handleGoToHome} 
+            onGoToOrders={handleGoToOrders} 
+          />
+        );
       case "products":
         return <RecipesScreen />;
       case "upload-recipe":

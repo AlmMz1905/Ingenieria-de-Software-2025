@@ -13,7 +13,11 @@ interface CartItem {
   price: number;
 }
 
-export function SalesScreen() {
+interface SalesScreenProps {
+  onProceedToCheckout?: () => void;
+}
+
+export function SalesScreen({ onProceedToCheckout }: SalesScreenProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [cartItems, setCartItems] = useState<CartItem[]>([
     { id: "1", name: "Ibuprofeno 400mg", barcode: "123456789", quantity: 2, price: 350.00 },
@@ -161,7 +165,7 @@ export function SalesScreen() {
               </div>
 
               <div className="space-y-3 pt-4">
-                <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg" size="lg">
+                <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg" size="lg" onClick={onProceedToCheckout}>
                   Finalizar Compra
                 </Button>
                 <Button variant="outline" className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50">

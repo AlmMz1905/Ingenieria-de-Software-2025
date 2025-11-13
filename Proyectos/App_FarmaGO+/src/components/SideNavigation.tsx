@@ -36,7 +36,7 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "sales", label: "Carrito", icon: ShoppingCart },
     { id: "products", label: "Mis recetas", icon: FileText },
     { id: "upload-recipe", label: "Cargar Receta", icon: Upload },
-    { id: "inventory", label: "Mapa", icon: Map },
+    { id: "catalog", label: "Catálogo", icon: Package },
     { id: "reviews", label: "Opiniones", icon: Star },
     { id: "settings", label: "Configuración de perfil", icon: Settings },
   ];
