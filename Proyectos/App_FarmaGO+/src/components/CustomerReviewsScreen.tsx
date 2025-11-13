@@ -1,196 +1,182 @@
 import { useState } from "react";
-import { Star, Send, Clock, MessageSquare } from "lucide-react";
+import { Star, Send } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Label } from "./ui/label";
+
+interface Review {
+  id: number;
+  pharmacyName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
 
 export function CustomerReviewsScreen() {
-  const [selectedPharmacy, setSelectedPharmacy] = useState("");
   const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  const pharmacies = [
-    { id: "1", name: "Farmacia del Centro" },
-    { id: "2", name: "Farmacia La Salud" },
-    { id: "3", name: "Farmacia San Martín" },
-    { id: "4", name: "Farmacia Cruz Verde" },
-    { id: "5", name: "Farmacia del Pueblo" },
-  ];
-
-  const myReviews = [
+  const [reviews, setReviews] = useState<Review[]>([
     {
       id: 1,
-      pharmacyName: "Farmacia del Centro",
+      pharmacyName: "Farmacia San José",
       rating: 5,
-      comment: "Excelente atención y rapidez en la entrega. Los medicamentos llegaron en perfecto estado.",
-      date: "2 Nov 2025",
+      comment: "Excelente atención y entrega rápida. Los medicamentos llegaron en perfecto estado.",
+      date: "15/11/2024"
     },
     {
       id: 2,
-      pharmacyName: "Farmacia La Salud",
+      pharmacyName: "Farmacia del Centro",
       rating: 4,
-      comment: "Muy buen servicio, aunque la entrega tard�� un poco más de lo esperado.",
-      date: "28 Oct 2025",
+      comment: "Muy buena experiencia, aunque el delivery tardó un poco más de lo esperado.",
+      date: "10/11/2024"
     },
     {
       id: 3,
-      pharmacyName: "Farmacia San Martín",
+      pharmacyName: "Farmacia La Plata",
       rating: 5,
-      comment: "Perfecta experiencia. El personal muy atento y profesional.",
-      date: "15 Oct 2025",
-    },
-    {
-      id: 4,
-      pharmacyName: "Farmacia Cruz Verde",
-      rating: 3,
-      comment: "Servicio correcto, pero podrían mejorar los tiempos de respuesta.",
-      date: "8 Oct 2025",
-    },
-  ];
+      comment: "Perfecto! El farmacéutico me asesoró muy bien sobre la medicación.",
+      date: "05/11/2024"
+    }
+  ]);
 
-  const handleSubmit = () => {
-    if (!selectedPharmacy || rating === 0 || !comment.trim()) {
-      alert("Por favor complete todos los campos antes de enviar.");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rating === 0 || comment.trim() === "") {
+      alert("Por favor, completa todos los campos");
       return;
     }
-    
-    alert("¡Gracias por tu opinión! Tu reseña ha sido enviada exitosamente.");
-    
-    // Reset form
-    setSelectedPharmacy("");
+
+    const newReview: Review = {
+      id: reviews.length + 1,
+      pharmacyName: "Farmacia San José", // Mock
+      rating,
+      comment,
+      date: new Date().toLocaleDateString('es-AR')
+    };
+
+    setReviews([newReview, ...reviews]);
     setRating(0);
     setComment("");
+    alert("¡Gracias por tu opinión! Tu reseña ha sido enviada exitosamente.");
   };
 
-  const renderStars = (currentRating: number, interactive: boolean = false) => {
+  const renderStars = (count: number, interactive: boolean = false) => {
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star
+          <button
             key={star}
-            className={`h-6 w-6 cursor-pointer transition-all ${
-              star <= (interactive ? (hoveredRating || rating) : currentRating)
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
-            }`}
+            type="button"
+            disabled={!interactive}
             onClick={() => interactive && setRating(star)}
-            onMouseEnter={() => interactive && setHoveredRating(star)}
-            onMouseLeave={() => interactive && setHoveredRating(0)}
-          />
+            onMouseEnter={() => interactive && setHoverRating(star)}
+            onMouseLeave={() => interactive && setHoverRating(0)}
+            className={`${interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'} transition-all`}
+          >
+            <Star
+              className={`h-6 w-6 ${
+                star <= (interactive ? (hoverRating || rating) : count)
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'fill-gray-200 text-gray-300'
+              }`}
+            />
+          </button>
         ))}
       </div>
     );
   };
 
   return (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="flex-1 p-6 space-y-6 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
-        <h2 className="text-3xl font-semibold mb-2">Opiniones</h2>
-        <p className="text-emerald-50">Comparte tu experiencia y consulta tus valoraciones anteriores</p>
+        <h2 className="text-3xl font-semibold mb-2">Opiniones y Calificaciones</h2>
+        <p className="text-emerald-50">Comparte tu experiencia con FarmaGo+</p>
       </div>
 
-      {/* Submit Review Section */}
-      <Card className="border-2 border-emerald-100 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-emerald-900">
-            <Send className="h-5 w-5 text-emerald-600" />
-            Enviar una Opinión
-          </CardTitle>
+      {/* Submit Review Form */}
+      <Card className="border-2 border-emerald-200 shadow-lg">
+        <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
+          <CardTitle className="text-emerald-900">Enviar una Opinión</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Pharmacy Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="pharmacy">Seleccionar Farmacia</Label>
-            <Select value={selectedPharmacy} onValueChange={setSelectedPharmacy}>
-              <SelectTrigger id="pharmacy" className="border-emerald-200 focus:ring-emerald-500">
-                <SelectValue placeholder="Selecciona una farmacia..." />
-              </SelectTrigger>
-              <SelectContent>
-                {pharmacies.map((pharmacy) => (
-                  <SelectItem key={pharmacy.id} value={pharmacy.id}>
-                    {pharmacy.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Rating Selection */}
-          <div className="space-y-2">
-            <Label>Calificación</Label>
-            <div className="flex items-center gap-3">
-              {renderStars(rating, true)}
-              {rating > 0 && (
-                <span className="text-sm text-gray-600">
-                  ({rating} {rating === 1 ? "estrella" : "estrellas"})
-                </span>
-              )}
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Rating */}
+            <div className="space-y-2">
+              <Label>Calificación</Label>
+              <div className="flex items-center gap-3">
+                {renderStars(rating, true)}
+                {rating > 0 && (
+                  <span className="text-sm font-medium text-emerald-700">
+                    {rating} de 5 estrellas
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Comment */}
-          <div className="space-y-2">
-            <Label htmlFor="comment">Tu Comentario</Label>
-            <Textarea
-              id="comment"
-              placeholder="Comparte tu experiencia con esta farmacia..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={5}
-              className="border-emerald-200 focus:ring-emerald-500 resize-none"
-            />
-            <p className="text-xs text-gray-500">{comment.length} / 500 caracteres</p>
-          </div>
+            {/* Comment */}
+            <div className="space-y-2">
+              <Label htmlFor="comment">Tu Opinión</Label>
+              <Textarea
+                id="comment"
+                placeholder="Cuéntanos sobre tu experiencia con la farmacia y el servicio..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="min-h-[120px] border-emerald-200 focus:ring-emerald-500"
+                required
+              />
+              <p className="text-sm text-gray-500">
+                {comment.length}/500 caracteres
+              </p>
+            </div>
 
-          {/* Submit Button */}
-          <Button
-            onClick={handleSubmit}
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Enviar Opinión
-          </Button>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+              size="lg"
+            >
+              <Send className="h-5 w-5 mr-2" />
+              Enviar Opinión
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
-      {/* My Review History Section */}
+      {/* Review History */}
       <Card className="border-2 border-emerald-100 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-emerald-900">
-            <MessageSquare className="h-5 w-5 text-emerald-600" />
-            Historial de Opiniones
-          </CardTitle>
+        <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
+          <CardTitle className="text-emerald-900">Historial de Opiniones</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {myReviews.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-              <p>Aún no has enviado ninguna opinión.</p>
-              <p className="text-sm">¡Comparte tu experiencia con las farmacias!</p>
+        <CardContent className="p-6">
+          {reviews.length === 0 ? (
+            <div className="text-center py-12">
+              <Star className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">Aún no has enviado ninguna opinión</p>
             </div>
           ) : (
-            myReviews.map((review) => (
-              <div
-                key={review.id}
-                className="p-4 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 rounded-xl border-2 border-emerald-100 hover:border-emerald-200 transition-all"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-semibold text-emerald-900">{review.pharmacyName}</h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Clock className="h-3 w-3 text-gray-500" />
-                      <p className="text-sm text-gray-600">{review.date}</p>
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="p-5 bg-gradient-to-br from-white to-emerald-50/30 rounded-xl border-2 border-emerald-200 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-emerald-900 mb-1">
+                        {review.pharmacyName}
+                      </h4>
+                      {renderStars(review.rating, false)}
                     </div>
+                    <span className="text-sm text-gray-500">{review.date}</span>
                   </div>
-                  {renderStars(review.rating)}
+                  <p className="text-gray-700">{review.comment}</p>
                 </div>
-                <p className="text-sm text-gray-700 italic">"{review.comment}"</p>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

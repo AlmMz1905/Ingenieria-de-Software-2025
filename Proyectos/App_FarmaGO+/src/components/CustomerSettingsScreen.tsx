@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { User, MapPin, Shield, Trash2, Plus, Edit, AlertTriangle, CreditCard } from "lucide-react";
+import { User, MapPin, Shield, Trash2, Plus, Edit, AlertTriangle, CreditCard, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { toast } from "sonner@2.0.3";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +18,16 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 
-export function CustomerSettingsScreen() {
-  const [activeTab, setActiveTab] = useState("profile");
-  
+interface CustomerSettingsScreenProps {
+  initialTab?: string;
+  onDeleteAccount?: () => void;
+}
+
+export function CustomerSettingsScreen({ initialTab = "profile", onDeleteAccount }: CustomerSettingsScreenProps) {
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [email, setEmail] = useState("maria.gonzalez@example.com");
+  const [emailError, setEmailError] = useState("");
+
   const addresses = [
     {
       id: 1,
@@ -54,6 +62,31 @@ export function CustomerSettingsScreen() {
 
   const handleDeleteAccount = () => {
     alert("Tu cuenta ha sido eliminada exitosamente. Lamentamos verte partir.");
+    if (onDeleteAccount) {
+      onDeleteAccount();
+    }
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Por favor, ingresa un email válido.");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    validateEmail(newEmail);
+  };
+
+  const handleSaveProfile = () => {
+    if (validateEmail(email)) {
+      toast.success("Cambios guardados exitosamente.");
+    }
   };
 
   return (
@@ -127,9 +160,16 @@ export function CustomerSettingsScreen() {
                   <Input 
                     id="email" 
                     type="email" 
-                    defaultValue="maria.gonzalez@example.com" 
-                    className="border-emerald-200 focus:ring-emerald-500"
+                    value={email} 
+                    onChange={handleEmailChange}
+                    className={`${emailError ? 'border-red-500 focus:ring-red-500' : 'border-emerald-200 focus:ring-emerald-500'}`}
                   />
+                  {emailError && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {emailError} Por favor, ingresa un formato válido como aa@bb.com
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Teléfono</Label>
@@ -141,7 +181,7 @@ export function CustomerSettingsScreen() {
                 </div>
               </div>
 
-              <Button className="w-full md:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600">
+              <Button className="w-full md:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600" onClick={handleSaveProfile}>
                 Guardar Cambios
               </Button>
             </CardContent>

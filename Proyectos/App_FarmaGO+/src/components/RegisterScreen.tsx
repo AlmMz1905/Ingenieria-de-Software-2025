@@ -8,7 +8,7 @@ import { Checkbox } from "./ui/checkbox";
 import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface RegisterScreenProps {
-  onRegister: (accountType: string) => void;
+  onRegister: (accountType: string, email: string) => void;
   onSwitchToLogin: () => void;
 }
 
@@ -40,7 +40,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenPr
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simular registro y pasar el tipo de cuenta
-    onRegister(formData.userType);
+    onRegister(formData.userType, formData.email);
   };
 
   const handleContinueToStep2 = () => {

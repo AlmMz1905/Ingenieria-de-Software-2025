@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Bell, ChevronDown, User, Settings, CreditCard, LogOut, HelpCircle } from "lucide-react";
+import { Bell, ChevronDown, User, CreditCard, LogOut, HelpCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,15 +15,15 @@ import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.pn
 
 interface TopNavigationProps {
   onLogout?: () => void;
-  onNavigate?: (section: string) => void;
+  onNavigate?: (section: string, tab?: string) => void;
 }
 
 export function TopNavigation({ onLogout, onNavigate }: TopNavigationProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const handleNavigate = (section: string) => {
+  const handleNavigate = (section: string, tab?: string) => {
     if (onNavigate) {
-      onNavigate(section);
+      onNavigate(section, tab);
     }
   };
 
@@ -72,17 +72,13 @@ export function TopNavigation({ onLogout, onNavigate }: TopNavigationProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleNavigate('users')}>
+            <DropdownMenuItem onClick={() => handleNavigate('settings', 'profile')}>
               <User className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
+              <span>Configuración de perfil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('settings')}>
+            <DropdownMenuItem onClick={() => handleNavigate('settings', 'payment')}>
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Métodos de Pago</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('settings')}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Configuración</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <HelpCircle className="mr-2 h-4 w-4" />

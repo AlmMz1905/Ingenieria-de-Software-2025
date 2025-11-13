@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster } from "./components/ui/sonner";
 import { TopNavigation } from "./components/TopNavigation";
 import { SideNavigation } from "./components/SideNavigation";
 import { DashboardScreen } from "./components/DashboardScreen";
@@ -19,19 +20,23 @@ import { StockManagementScreen } from "./components/StockManagementScreen";
 import { UsersScreen } from "./components/UsersScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
+import { VerifyAccountScreen } from "./components/VerifyAccountScreen";
+import { AccountCreatedScreen } from "./components/AccountCreatedScreen";
 import { PasswordResetRequestScreen } from "./components/PasswordResetRequestScreen";
 import { PasswordResetEmailSentScreen } from "./components/PasswordResetEmailSentScreen";
 import { PasswordResetNewPasswordScreen } from "./components/PasswordResetNewPasswordScreen";
 
-type AuthView = "login" | "register" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
+type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState("home");
+  const [settingsTab, setSettingsTab] = useState("profile");
   const [authView, setAuthView] = useState<AuthView>("login");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<UserType>("");
   const [resetEmail, setResetEmail] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
 
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
@@ -39,10 +44,24 @@ export default function App() {
     setUserType(accountType as UserType);
   };
 
-  const handleRegister = (accountType: string) => {
-    setIsAuthenticated(true);
-    setAuthView("app");
+  const handleRegister = (accountType: string, email: string) => {
+    setRegisterEmail(email);
     setUserType(accountType as UserType);
+    setAuthView("verify-account");
+  };
+
+  const handleVerifyAccount = (code: string) => {
+    // Simulate verification
+    console.log("Verification code:", code);
+    setAuthView("account-created");
+  };
+
+  const handleResendCode = () => {
+    alert("Código reenviado a " + registerEmail);
+  };
+
+  const handleGoToLogin = () => {
+    setAuthView("login");
   };
 
   const handleLogout = () => {
@@ -50,6 +69,17 @@ export default function App() {
     setAuthView("login");
     setActiveSection("home");
     setUserType("");
+  };
+
+  const handleNavigate = (section: string, tab?: string) => {
+    setActiveSection(section);
+    if (tab && section === "settings") {
+      setSettingsTab(tab);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    handleLogout();
   };
 
   const handleForgotPassword = () => {
@@ -106,7 +136,7 @@ export default function App() {
       case "users":
         return <UsersScreen />;
       case "settings":
-        return <CustomerSettingsScreen />;
+        return <CustomerSettingsScreen initialTab={settingsTab} onDeleteAccount={handleDeleteAccount} />;
       default:
         return <DashboardScreen onNavigate={setActiveSection} />;
     }
@@ -119,6 +149,20 @@ export default function App() {
         <RegisterScreen
           onRegister={handleRegister}
           onSwitchToLogin={() => setAuthView("login")}
+        />
+      );
+    } else if (authView === "verify-account") {
+      return (
+        <VerifyAccountScreen
+          email={registerEmail}
+          onVerify={handleVerifyAccount}
+          onResendCode={handleResendCode}
+        />
+      );
+    } else if (authView === "account-created") {
+      return (
+        <AccountCreatedScreen
+          onGoToLogin={handleGoToLogin}
         />
       );
     } else if (authView === "forgot-password") {
@@ -154,20 +198,23 @@ export default function App() {
 
   // Show main app when authenticated
   return (
-    <div className="h-screen w-screen flex flex-col bg-background">
-      <TopNavigation onLogout={handleLogout} onNavigate={setActiveSection} />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <SideNavigation 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-          userType={userType}
-        />
+    <>
+      <Toaster position="top-right" />
+      <div className="h-screen w-screen flex flex-col bg-background">
+        <TopNavigation onLogout={handleLogout} onNavigate={handleNavigate} />
         
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-emerald-50/30 via-white to-teal-50/30">
-          {renderContent()}
-        </main>
+        <div className="flex flex-1 overflow-hidden">
+          <SideNavigation 
+            activeSection={activeSection} 
+            onSectionChange={setActiveSection}
+            userType={userType}
+          />
+          
+          <main className="flex-1 overflow-auto bg-gradient-to-br from-emerald-50/30 via-white to-teal-50/30">
+            {renderContent()}
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
