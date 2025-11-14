@@ -29,6 +29,7 @@ import { AccountCreatedScreen } from "./components/AccountCreatedScreen";
 import { PasswordResetRequestScreen } from "./components/PasswordResetRequestScreen";
 import { PasswordResetEmailSentScreen } from "./components/PasswordResetEmailSentScreen";
 import { PasswordResetNewPasswordScreen } from "./components/PasswordResetNewPasswordScreen";
+import { PharmacyOrdersScreen } from "./components/PharmacyOrdersScreen";
 
 type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
@@ -159,6 +160,8 @@ export default function App() {
       switch (activeSection) {
         case "home":
           return <PharmacyDashboard onNavigate={setActiveSection} />;
+        case "pharmacy-orders":
+          return <PharmacyOrdersScreen />;
         case "uploaded-recipes":
           return <UploadedRecipesScreen />;
         case "stock-management":

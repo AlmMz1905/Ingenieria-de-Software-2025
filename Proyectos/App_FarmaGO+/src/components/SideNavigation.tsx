@@ -24,6 +24,7 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
   // Menú para Empleado de Farmacia
   const pharmacyMenuItems = [
     { id: "home", label: "Home", icon: Home },
+    { id: "pharmacy-orders", label: "Pedidos", icon: Package },
     { id: "uploaded-recipes", label: "Recetas Cargadas", icon: FileText },
     { id: "stock-management", label: "Gestión de Stock", icon: PackageSearch },
     { id: "pharmacy-ratings", label: "Calificación", icon: Star },

@@ -151,6 +151,51 @@ export function UploadedRecipesScreen() {
     setRejectionReason("");
   };
 
+  // Imprimir comprobantes (cliente lo solicita)
+  const printSoldReceipt = async (recipe: any) => {
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/recipes/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "sale", recipe, format: "html" }),
+      });
+      if (!res.ok) throw new Error(`Servidor respondió ${res.status}`);
+      const html = await res.text();
+      const w = window.open("", "_blank", "noopener,noreferrer");
+      if (w) {
+        w.document.write(html);
+        w.document.close();
+      } else {
+        alert("No se pudo abrir la ventana para imprimir. Revisa el bloqueador de ventanas emergentes.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("Error al generar comprobante: " + (err?.message || err));
+    }
+  };
+
+  const printDeliveredReceipt = async (recipe: any) => {
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/recipes/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "delivery", recipe, format: "html" }),
+      });
+      if (!res.ok) throw new Error(`Servidor respondió ${res.status}`);
+      const html = await res.text();
+      const w = window.open("", "_blank", "noopener,noreferrer");
+      if (w) {
+        w.document.write(html);
+        w.document.close();
+      } else {
+        alert("No se pudo abrir la ventana para imprimir. Revisa el bloqueador de ventanas emergentes.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("Error al generar comprobante: " + (err?.message || err));
+    }
+  };
+
   const RecipeCard = ({ recipe }: { recipe: typeof recipes[0] }) => (
     <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all hover:shadow-lg">
       <CardHeader className="pb-3">
@@ -247,6 +292,16 @@ export function UploadedRecipesScreen() {
                 <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
                   <Phone className="h-4 w-4 mr-1" />
                   Llamar
+                </Button>
+              </>
+            )}
+            {recipe.status === "completed" && (
+              <>
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => printSoldReceipt(recipe)}>
+                  Imprimir Comprobante de Venta
+                </Button>
+                <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50" onClick={() => printDeliveredReceipt(recipe)}>
+                  Imprimir Comprobante de Entrega
                 </Button>
               </>
             )}
