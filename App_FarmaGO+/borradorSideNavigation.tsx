@@ -13,12 +13,7 @@ import {
   PackageSearch,
   ClipboardList
 } from "lucide-react";
-// ======================================================================
-// ¡CAMBIO ACÁ! El error era que no encontraba el archivo del botón.
-// Tu proyecto (como vi en los archivos anteriores) usa un "alias" (@), 
-// así que lo corregí para que apunte a la ruta correcta de ShadCN.
-// ======================================================================
-import { Button } from "@/components/ui/button";
+import { Button } from "./ui/button";
 
 interface SideNavigationProps {
   activeSection: string;
@@ -28,7 +23,6 @@ interface SideNavigationProps {
 
 export function SideNavigation({ activeSection, onSectionChange, userType }: SideNavigationProps) {
   // Menú para Empleado de Farmacia
-  // (Esto ya estaba bien en tu archivo, lo dejo como está)
   const pharmacyMenuItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "uploaded-recipes", label: "Recetas Cargadas", icon: FileText },

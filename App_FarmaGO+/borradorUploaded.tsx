@@ -1,45 +1,29 @@
 import { FileText, User, Clock, CheckCircle, XCircle, Eye, Phone, Package, Calendar, ZoomIn, ZoomOut, AlertTriangle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "./ui/select";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-
-// Tipado simple para la receta (reusado en los modales)
-type Recipe = {
-  id: string;
-  patientName: string;
-  phone: string;
-  uploadDate: string;
-  status: string;
-  medications: string[];
-  doctor: string;
-  total: string;
-  priority: string;
-  imageUrl?: string; // Asumimos que la URL de la imagen puede venir aquí
-};
 
 export function UploadedRecipesScreen() {
   const [validationModalOpen, setValidationModalOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [viewModalOpen, setViewModalOpen] = useState(false); // ¡NUEVO ESTADO!
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [selectedRecipe, setSelectedRecipe] = useState<any>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [rejectionReason, setRejectionReason] = useState("");
   
-  // Datos mock (iguales a los que tenías)
-  const recipes: Recipe[] = [
+  const recipes = [
     {
       id: "REC-001",
       patientName: "María González",
@@ -50,7 +34,6 @@ export function UploadedRecipesScreen() {
       doctor: "Dr. Juan Pérez",
       total: "$3,200",
       priority: "normal",
-      imageUrl: "https://images.unsplash.com/photo-1758691462814-485c3672e447?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVzY3JpcHRpb24lMjBtZWRpY2FsJTIwZG9jdW1lbnR8ZW58MXx8fHwxNzYyNTIzNzUzfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       id: "REC-002",
@@ -62,9 +45,40 @@ export function UploadedRecipesScreen() {
       doctor: "Dra. Ana Martínez",
       total: "$4,500",
       priority: "normal",
-      imageUrl: "https://images.unsplash.com/photo-1758691462814-485c3672e447?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVzY3JpcHRpb24lMjBtZWRpY2FsJTIwZG9jdW1lbnR8ZW58MXx8fHwxNzYyNTIzNzUzfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
-    // ... (el resto de tus recetas)
+    {
+      id: "REC-003",
+      patientName: "Ana Martínez",
+      phone: "+54 11 4567-8901",
+      uploadDate: "28 Oct 2025, 07:30",
+      status: "ready",
+      medications: ["Paracetamol 500mg x20"],
+      doctor: "Dr. Luis Fernández",
+      total: "$800",
+      priority: "low",
+    },
+    {
+      id: "REC-004",
+      patientName: "Juan Pérez",
+      phone: "+54 11 5678-9012",
+      uploadDate: "27 Oct 2025, 18:20",
+      status: "completed",
+      medications: ["Omeprazol 20mg x30", "Metformina 850mg x60"],
+      doctor: "Dra. Laura Sánchez",
+      total: "$2,900",
+      priority: "normal",
+    },
+    {
+      id: "REC-005",
+      patientName: "Laura Fernández",
+      phone: "+54 11 6789-0123",
+      uploadDate: "28 Oct 2025, 10:00",
+      status: "pending",
+      medications: ["Insulina Glargina", "Tiras reactivas x50"],
+      doctor: "Dr. Roberto García",
+      total: "$8,500",
+      priority: "high",
+    },
     {
       id: "REC-006",
       patientName: "Roberto García",
@@ -75,7 +89,6 @@ export function UploadedRecipesScreen() {
       doctor: "N/A",
       total: "$0",
       priority: "normal",
-      imageUrl: "https://images.unsplash.com/photo-1758691462814-485c3672e447?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVzY3JpcHRpb24lMjBtZWRpY2FsJTIwZG9jdW1lbnR8ZW58MXx8fHwxNzYyNTIzNzUzfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
   ];
 
@@ -114,20 +127,11 @@ export function UploadedRecipesScreen() {
     return recipes.filter(recipe => recipe.status === status);
   };
 
-  const handleOpenValidation = (recipe: Recipe) => {
+  const handleOpenValidation = (recipe: any) => {
     setSelectedRecipe(recipe);
     setValidationModalOpen(true);
     setZoomLevel(1);
   };
-
-  // --- ¡NUEVA FUNCIÓN! ---
-  // Abre el modal de "Solo Vista"
-  const handleViewRecipe = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setViewModalOpen(true);
-    setZoomLevel(1);
-  };
-  // --- FIN NUEVA FUNCIÓN ---
 
   const handleApprove = () => {
     alert(`Receta ${selectedRecipe?.id} aprobada exitosamente`);
@@ -147,8 +151,7 @@ export function UploadedRecipesScreen() {
     setRejectionReason("");
   };
 
-  // Componente de tarjeta de receta
-  const RecipeCard = ({ recipe }: { recipe: Recipe }) => (
+  const RecipeCard = ({ recipe }: { recipe: typeof recipes[0] }) => (
     <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all hover:shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -202,12 +205,7 @@ export function UploadedRecipesScreen() {
         {/* Total and Actions */}
         <div className="flex items-center justify-between pt-2 border-t">
           <span className="text-lg font-semibold text-emerald-700">{recipe.total}</span>
-          
-          {/* --- MODIFICACIÓN DE BOTONES --- */}
-          {/* Agregué 'flex-wrap' y 'justify-end' para que los botones 
-            se apilen si no entran.
-          */}
-          <div className="flex gap-2 flex-wrap justify-end">
+          <div className="flex gap-2">
             {recipe.status === "pending" && (
               <>
                 <Button 
@@ -252,22 +250,16 @@ export function UploadedRecipesScreen() {
                 </Button>
               </>
             )}
-            
-            {/* --- ¡BOTÓN "VER" MODIFICADO! ---
-              Ahora llama a la nueva función handleViewRecipe
-            */}
             <Button 
               size="sm" 
               variant="outline" 
               className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-              onClick={() => handleViewRecipe(recipe)}
+              onClick={() => handleOpenValidation(recipe)}
             >
               <Eye className="h-4 w-4 mr-1" />
               Ver
             </Button>
           </div>
-          {/* --- FIN MODIFICACIÓN BOTONES --- */}
-          
         </div>
       </CardContent>
     </Card>
@@ -281,7 +273,7 @@ export function UploadedRecipesScreen() {
         <p className="text-emerald-50">Gestiona las recetas médicas de los pacientes</p>
       </div>
 
-      {/* Stats Cards (Sin cambios) */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="border-2 border-yellow-200">
           <CardContent className="p-4">
@@ -298,7 +290,7 @@ export function UploadedRecipesScreen() {
             </div>
           </CardContent>
         </Card>
-        {/* ... (Las otras 4 stats cards que ya tenías) ... */}
+
         <Card className="border-2 border-emerald-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -314,6 +306,7 @@ export function UploadedRecipesScreen() {
             </div>
           </CardContent>
         </Card>
+
         <Card className="border-2 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -329,6 +322,7 @@ export function UploadedRecipesScreen() {
             </div>
           </CardContent>
         </Card>
+
         <Card className="border-2 border-gray-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -344,6 +338,7 @@ export function UploadedRecipesScreen() {
             </div>
           </CardContent>
         </Card>
+
         <Card className="border-2 border-red-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -361,7 +356,7 @@ export function UploadedRecipesScreen() {
         </Card>
       </div>
 
-      {/* Recipes List with Tabs (Sin cambios) */}
+      {/* Recipes List with Tabs */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-6 mb-4">
           <TabsTrigger value="all">Todas</TabsTrigger>
@@ -377,26 +372,31 @@ export function UploadedRecipesScreen() {
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </TabsContent>
+
         <TabsContent value="pending" className="space-y-4">
           {filterByStatus("pending").map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </TabsContent>
+
         <TabsContent value="processing" className="space-y-4">
           {filterByStatus("processing").map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </TabsContent>
+
         <TabsContent value="ready" className="space-y-4">
           {filterByStatus("ready").map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </TabsContent>
+
         <TabsContent value="completed" className="space-y-4">
           {filterByStatus("completed").map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </TabsContent>
+
         <TabsContent value="rejected" className="space-y-4">
           {filterByStatus("rejected").map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
@@ -404,20 +404,19 @@ export function UploadedRecipesScreen() {
         </TabsContent>
       </Tabs>
 
-      {/* MODAL DE VALIDACIÓN (El que ya tenías) */}
+      {/* Validation Modal - Full Screen with Two Panels */}
       <Dialog open={validationModalOpen} onOpenChange={setValidationModalOpen}>
-        {/* --- ¡CAMBIO DE ANCHO! --- */}
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Validar Receta - {selectedRecipe?.id}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-6 h-[70vh]">
-            {/* Panel Izquierdo - Imagen (Sin cambios) */}
+            {/* Left Panel - Image */}
             <div className="flex flex-col border-2 border-emerald-200 rounded-xl p-4 bg-gray-50">
               <h4 className="font-semibold text-emerald-900 mb-3">Imagen de la Receta</h4>
               <div className="flex-1 overflow-auto flex items-center justify-center bg-white rounded-lg border border-gray-200">
                 <ImageWithFallback
-                  src={selectedRecipe?.imageUrl || "https://placehold.co/600x400?text=Receta"}
+                  src="https://images.unsplash.com/photo-1758691462814-485c3672e447?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVzY3JpcHRpb24lMjBtZWRpY2FsJTIwZG9jdW1lbnR8ZW58MXx8fHwxNzYyNTIzNzUzfDA&ixlib=rb-4.1.0&q=80&w=1080"
                   alt="Receta Médica"
                   className="max-w-full max-h-full object-contain"
                   style={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.2s' }}
@@ -442,9 +441,8 @@ export function UploadedRecipesScreen() {
               </div>
             </div>
 
-            {/* Panel Derecho - Datos & Acciones */}
-            {/* --- ¡CAMBIO DE SCROLL! --- */}
-            <div className="flex flex-col space-y-4 overflow-y-auto">
+            {/* Right Panel - Data & Actions */}
+            <div className="flex flex-col space-y-4">
               <Card className="border-2 border-emerald-100">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Datos de la Receta</CardTitle>
@@ -510,9 +508,9 @@ export function UploadedRecipesScreen() {
                       <XCircle className="h-5 w-5" />
                       Receta No Válida
                     </h5>
-                    <p classNameclassName="text-sm text-gray-700 mb-3">
+                    <p className="text-sm text-gray-700 mb-3">
                       La receta tiene problemas que impiden su procesamiento.
-                    </p> {/* <-- ¡ERROR CORREGIDO! (p className) */}
+                    </p>
                     <Button 
                       variant="outline"
                       className="w-full border-red-300 text-red-700 hover:bg-red-50"
@@ -529,94 +527,7 @@ export function UploadedRecipesScreen() {
         </DialogContent>
       </Dialog>
 
-      {/* --- ¡NUEVO MODAL DE "SOLO VISTA"! --- */}
-      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
-        {/* --- ¡CAMBIO DE ANCHO! --- */}
-        <DialogContent className="max-w-8xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>Ver Receta - {selectedRecipe?.id}</DialogTitle>
-            <DialogDescription>
-              Detalles de la receta de {selectedRecipe?.patientName} (Solo Vista)
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-6 h-[70vh]">
-            {/* Panel Izquierdo - Imagen */}
-            <div className="flex flex-col border-2 border-gray-200 rounded-xl p-4 bg-gray-50">
-              <h4 className="font-semibold text-gray-900 mb-3">Imagen de la Receta</h4>
-              <div className="flex-1 overflow-auto flex items-center justify-center bg-white rounded-lg border border-gray-200">
-                <ImageWithFallback
-                  src={selectedRecipe?.imageUrl || "https://placehold.co/600x400?text=Receta"}
-                  alt="Receta Médica"
-                  className="max-w-full max-h-full object-contain"
-                  style={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.2s' }}
-                />
-              </div>
-              <div className="flex items-center justify-center gap-2 mt-3">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
-                >
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-gray-600">{Math.round(zoomLevel * 100)}%</span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setZoomLevel(Math.min(3, zoomLevel + 0.1))}
-                >
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Panel Derecho - Datos (SIN ACCIONES) */}
-            <div className="flex flex-col space-y-4 overflow-y-auto">
-              <Card className="border-2 border-gray-100">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Datos de la Receta</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs text-gray-600">Paciente</Label>
-                      <p className="font-medium">{selectedRecipe?.patientName}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-600">Teléfono</Label>
-                      <p className="font-medium">{selectedRecipe?.phone}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-600">Médico</Label>
-                      <p className="font-medium">{selectedRecipe?.doctor}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-600">Fecha de carga</Label>
-                      <p className="font-medium">{selectedRecipe?.uploadDate}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-600">Medicamentos</Label>
-                    <ul className="mt-1 space-y-1">
-                      {selectedRecipe?.medications.map((med: string, idx: number) => (
-                        <li key={idx} className="text-sm">• {med}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-600">Total</Label>
-                    <p className="text-lg font-semibold text-emerald-600">{selectedRecipe?.total}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      {/* --- FIN NUEVO MODAL --- */}
-
-
-      {/* Rejection Modal (Sin cambios) */}
+      {/* Rejection Modal */}
       <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

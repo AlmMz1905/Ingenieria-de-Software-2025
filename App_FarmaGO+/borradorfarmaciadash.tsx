@@ -1,11 +1,6 @@
 import { FileText, Clock, CheckCircle, AlertCircle, Star, TrendingUp, ChevronRight, Package } from "lucide-react";
-// ======================================================================
-// ¡CAMBIO ACÁ! El error era que no encontraba las carpetas "./ui/".
-// Tu proyecto (como vi en los archivos anteriores) usa un "alias" (@), 
-// así que lo corregí para que apunte a la ruta correcta de ShadCN.
-// ======================================================================
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "./ui/card";
+import { Badge } from "./ui/badge";
 
 interface PharmacyDashboardProps {
   onNavigate?: (section: string) => void;
@@ -26,7 +21,7 @@ export function PharmacyDashboard({ onNavigate }: PharmacyDashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Recetas Pendientes (Sin cambios) */}
+        {/* Card 1: Recetas Pendientes */}
         <Card 
           className="border-2 border-yellow-200 hover:border-yellow-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
           onClick={() => handleNavigate('uploaded-recipes')}
@@ -47,12 +42,10 @@ export function PharmacyDashboard({ onNavigate }: PharmacyDashboardProps) {
           </CardContent>
         </Card>
 
-        {/* ====================================================================== */}
-        {/* Card 2: MODIFICADA (Antes "En Preparación") */}
+        {/* Card 2: En Proceso */}
         <Card 
           className="border-2 border-emerald-200 hover:border-emerald-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
-          // 1. CAMBIO: Ahora apunta a 'order-management' (Gestión de Pedidos)
-          onClick={() => handleNavigate('order-management')}
+          onClick={() => handleNavigate('uploaded-recipes')}
         >
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
@@ -61,19 +54,16 @@ export function PharmacyDashboard({ onNavigate }: PharmacyDashboardProps) {
               </div>
               <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">Activo</Badge>
             </div>
-            {/* 2. CAMBIO: Renombrado a "Pedidos" */}
-            <h3 className="font-semibold text-emerald-900 mb-1">Pedidos</h3>
+            <h3 className="font-semibold text-emerald-900 mb-1">En Preparación</h3>
             <p className="text-2xl font-bold text-emerald-600 mb-2">5</p>
             <div className="flex items-center text-sm text-emerald-600 font-medium">
-              <span>Gestionar pedidos</span>
+              <span>Ver detalles</span>
               <ChevronRight className="h-4 w-4 ml-1" />
             </div>
           </CardContent>
         </Card>
-        {/* ====================================================================== */}
 
-
-        {/* Card 3: Completadas Hoy (Sin cambios) */}
+        {/* Card 3: Completadas Hoy */}
         <Card 
           className="border-2 border-teal-200 hover:border-teal-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
           onClick={() => handleNavigate('uploaded-recipes')}
@@ -96,7 +86,7 @@ export function PharmacyDashboard({ onNavigate }: PharmacyDashboardProps) {
           </CardContent>
         </Card>
 
-        {/* Card 4: Calificación de la Farmacia (Sin cambios) */}
+        {/* Card 4: Calificación de la Farmacia */}
         <Card 
           className="border-2 border-yellow-200 hover:border-yellow-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
           onClick={() => handleNavigate('pharmacy-ratings')}
@@ -123,7 +113,7 @@ export function PharmacyDashboard({ onNavigate }: PharmacyDashboardProps) {
         </Card>
       </div>
 
-      {/* Stats Summary (Sin cambios) */}
+      {/* Stats Summary */}
       <Card className="border-2 border-emerald-100 shadow-lg">
         <CardContent className="p-6">
           <h3 className="font-semibold text-emerald-900 mb-4 text-lg">Resumen de Actividad</h3>
@@ -139,7 +129,7 @@ export function PharmacyDashboard({ onNavigate }: PharmacyDashboardProps) {
         </CardContent>
       </Card>
 
-      {/* Recent Activity (Sin cambios) */}
+      {/* Recent Activity */}
       <div className="grid grid-cols-1 gap-4">
         <Card className="border-2 border-emerald-100">
           <CardContent className="p-4">
