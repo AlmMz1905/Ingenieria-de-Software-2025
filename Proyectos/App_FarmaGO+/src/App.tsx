@@ -17,6 +17,8 @@ import { ChatScreenCustomer } from "./components/ChatScreenCustomer";
 import { ChatScreenPharmacy } from "./components/ChatScreenPharmacy";
 import { CustomerReviewsScreen } from "./components/CustomerReviewsScreen";
 import { UploadedRecipesScreen } from "./components/UploadedRecipesScreen";
+import { OrderManagementScreen } from "./components/OrderManagementScreen";
+import { OrderDetailScreen } from "./components/OrderDetailScreen";
 import { PharmacyRatingsScreen } from "./components/PharmacyRatingsScreen";
 import { CustomerSettingsScreen } from "./components/CustomerSettingsScreen";
 import { PharmacySettingsScreen } from "./components/PharmacySettingsScreen";
@@ -50,6 +52,9 @@ export default function App() {
   const [orderId, setOrderId] = useState("");
   const [orderTotal] = useState(2850.00); // Mock order total
   const [deliveryFee] = useState(350.00); // Mock delivery fee
+
+  // Order management state
+  const [selectedOrderId, setSelectedOrderId] = useState<string>("");
 
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
@@ -154,6 +159,22 @@ export default function App() {
     setCheckoutStep("address");
   };
 
+  // Order management handlers
+  const handleNavigateToOrderDetail = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setActiveSection("order-detail");
+  };
+
+  const handleBackToOrderManagement = () => {
+    setSelectedOrderId("");
+    setActiveSection("order-management");
+  };
+
+  const handleOrderComplete = (orderId: string, completionType: string) => {
+    console.log(`Order ${orderId} completed via ${completionType}`);
+    // En producción, aquí actualizarías el estado global o harías una llamada a la API
+  };
+
   const renderContent = () => {
     // Contenido específico para empleados de farmacia
     if (userType === "empleado") {
@@ -164,6 +185,16 @@ export default function App() {
           return <PharmacyOrdersScreen />;
         case "uploaded-recipes":
           return <UploadedRecipesScreen />;
+        case "order-management":
+          return <OrderManagementScreen onNavigateToDetail={handleNavigateToOrderDetail} />;
+        case "order-detail":
+          return (
+            <OrderDetailScreen 
+              orderId={selectedOrderId} 
+              onBack={handleBackToOrderManagement}
+              onOrderComplete={handleOrderComplete}
+            />
+          );
         case "stock-management":
           return <StockManagementScreen />;
         case "pharmacy-ratings":
@@ -181,7 +212,7 @@ export default function App() {
         return <DashboardScreen onNavigate={setActiveSection} />;
       case "sales":
         return <SalesScreen onProceedToCheckout={handleProceedToCheckout} />;
-      case "catalogo":
+      case "catalog":
         return <ProductCatalogScreen onNavigateToCart={handleNavigateToCart} />;
       case "checkout-address":
         return checkoutStep === "address" ? (
@@ -200,13 +231,7 @@ export default function App() {
             onGoToOrders={handleGoToOrders} 
           />
         );
-      
-      // ===============================================
-      // ¡¡¡AQUÍ ESTÁ EL CAMBIO!!! (Línea 218)
-      // Cambié "products" por "mis-recetas" para que 
-      // coincida con el 'handleNavigate' del Dashboard.
-      // ===============================================
-      case "mis-recetas": 
+      case "products":
         return <RecipesScreen />;
       case "upload-recipe":
         return <UploadRecipeScreen />;

@@ -1,14 +1,6 @@
-import { 
-  Upload, 
-  Store, 
-  Package, 
-  ChevronRight, 
-  BookMarked, // Ícono nuevo para Catálogo (ejemplo)
-  ClipboardList, // Ícono nuevo para Mis Recetas (ejemplo)
-  MessageSquare // <-- ¡ACÁ ESTABA EL ERROR! FALTABA ESTE.
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Upload, MapPin, Store, MessageSquare, Package, ChevronRight } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
+import { Badge } from "./ui/badge";
 
 interface DashboardScreenProps {
   onNavigate?: (section: string) => void;
@@ -28,9 +20,8 @@ export function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         <p className="text-emerald-50">Accesos rápidos a las funciones principales</p>
       </div>
 
-      {/* --- INICIO DE CAMBIOS --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Card 1: Subir / Escanear receta (Se mantiene igual) */}
+        {/* Card 1: Subir / Escanear receta */}
         <Card 
           className="border-2 border-emerald-200 hover:border-emerald-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
           onClick={() => handleNavigate('upload-recipe')}
@@ -53,56 +44,56 @@ export function DashboardScreen({ onNavigate }: DashboardScreenProps) {
           </CardContent>
         </Card>
 
-        {/* Card 2: Catálogo (MODIFICADO - Antes Rastrear Pedido) */}
+        {/* Card 2: Rastrear pedido (mapa en vivo) */}
         <Card 
           className="border-2 border-teal-200 hover:border-teal-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
-          onClick={() => handleNavigate('catalogo')} // <-- CAMBIADO
+          onClick={() => handleNavigate('inventory')}
         >
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl flex items-center justify-center shadow-md">
-                <BookMarked className="h-6 w-6 text-teal-600" /> {/* <-- CAMBIADO */}
+                <MapPin className="h-6 w-6 text-teal-600" />
               </div>
-              {/* (Saqué la badge de "En camino") */}
+              <Badge className="bg-teal-100 text-teal-700 border-teal-300">En camino</Badge>
             </div>
-            <h3 className="font-semibold text-teal-900 mb-1">Catálogo</h3> {/* <-- CAMBIADO */}
+            <h3 className="font-semibold text-teal-900 mb-1">Rastrear Pedido</h3>
             <p className="text-sm text-gray-600 mb-3">
-              Ver productos y medicamentos
-            </p> {/* <-- CAMBIADO */}
+              Ubicación en tiempo real - ETA: 12 min
+            </p>
             <div className="flex items-center text-sm text-teal-600 font-medium">
-              <span>Ver catálogo</span> {/* <-- CAMBIADO */}
+              <span>Ver mapa</span>
               <ChevronRight className="h-4 w-4 ml-1" />
             </div>
           </CardContent>
         </Card>
 
-        {/* Card 3: Mis Recetas (MODIFICADO - Antes Mi Farmacia) */}
+        {/* Card 3: Mi farmacia / Seleccionar farmacia */}
         <Card 
           className="border-2 border-cyan-200 hover:border-cyan-400 transition-all cursor-pointer hover:shadow-xl hover:scale-105 bg-white"
-          onClick={() => handleNavigate('mis-recetas')} // <-- CAMBIADO
+          onClick={() => handleNavigate('inventory')}
         >
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center shadow-md">
-                <ClipboardList className="h-6 w-6 text-cyan-600" /> {/* <-- CAMBIADO */}
+                <Store className="h-6 w-6 text-cyan-600" />
               </div>
-              {/* (Saqué la badge de "24h") */}
+              <Badge variant="outline" className="text-emerald-600 border-emerald-500 bg-emerald-50 font-medium">
+                24h
+              </Badge>
             </div>
-            <h3 className="font-semibold text-cyan-900 mb-1">Mis Recetas</h3> {/* <-- CAMBIADO */}
+            <h3 className="font-semibold text-cyan-900 mb-1">Mi Farmacia</h3>
             <p className="text-sm text-gray-600 mb-3">
-              Ver tus recetas y pedidos
-            </p> {/* <-- CAMBIADO */}
+              Farmacia San José - 0.8 km
+            </p>
             <div className="flex items-center text-sm text-cyan-600 font-medium">
-              <span>Ver historial</span> {/* <-- CAMBIADO */}
+              <span>Cambiar farmacia</span>
               <ChevronRight className="h-4 w-4 ml-1" />
             </div>
           </CardContent>
         </Card>
       </div>
-      {/* --- FIN DE CAMBIOS --- */}
 
-
-      {/* Additional Quick Stats (ESTA PARTE ESTÁ IDÉNTICA A TU CÓDIGO) */}
+      {/* Additional Quick Stats */}
       <Card className="border-2 border-emerald-100 shadow-lg">
         <CardContent className="p-6">
           <h3 className="font-semibold text-emerald-900 mb-4 text-lg">Resumen de Actividad</h3>

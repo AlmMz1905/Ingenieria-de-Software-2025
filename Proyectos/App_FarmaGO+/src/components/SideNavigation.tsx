@@ -10,7 +10,8 @@ import {
   Settings,
   Package,
   Star,
-  PackageSearch
+  PackageSearch,
+  ClipboardList
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -26,6 +27,7 @@ export function SideNavigation({ activeSection, onSectionChange, userType }: Sid
     { id: "home", label: "Home", icon: Home },
     { id: "pharmacy-orders", label: "Pedidos", icon: Package },
     { id: "uploaded-recipes", label: "Recetas Cargadas", icon: FileText },
+    { id: "order-management", label: "Gestión de Pedidos", icon: ClipboardList },
     { id: "stock-management", label: "Gestión de Stock", icon: PackageSearch },
     { id: "pharmacy-ratings", label: "Calificación", icon: Star },
     { id: "settings", label: "Settings", icon: Settings },
