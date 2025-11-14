@@ -178,7 +178,7 @@ export default function App() {
         return <DashboardScreen onNavigate={setActiveSection} />;
       case "sales":
         return <SalesScreen onProceedToCheckout={handleProceedToCheckout} />;
-      case "catalogo":
+      case "catalog":
         return <ProductCatalogScreen onNavigateToCart={handleNavigateToCart} />;
       case "checkout-address":
         return checkoutStep === "address" ? (
@@ -197,13 +197,7 @@ export default function App() {
             onGoToOrders={handleGoToOrders} 
           />
         );
-      
-      // ===============================================
-      // ¡¡¡AQUÍ ESTÁ EL CAMBIO!!! (Línea 218)
-      // Cambié "products" por "mis-recetas" para que 
-      // coincida con el 'handleNavigate' del Dashboard.
-      // ===============================================
-      case "mis-recetas": 
+      case "products":
         return <RecipesScreen />;
       case "upload-recipe":
         return <UploadRecipeScreen />;
