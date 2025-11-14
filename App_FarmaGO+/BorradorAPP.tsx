@@ -29,7 +29,6 @@ import { AccountCreatedScreen } from "./components/AccountCreatedScreen";
 import { PasswordResetRequestScreen } from "./components/PasswordResetRequestScreen";
 import { PasswordResetEmailSentScreen } from "./components/PasswordResetEmailSentScreen";
 import { PasswordResetNewPasswordScreen } from "./components/PasswordResetNewPasswordScreen";
-import { PharmacyOrdersScreen } from "./components/PharmacyOrdersScreen";
 
 type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
@@ -160,8 +159,6 @@ export default function App() {
       switch (activeSection) {
         case "home":
           return <PharmacyDashboard onNavigate={setActiveSection} />;
-        case "pharmacy-orders":
-          return <PharmacyOrdersScreen />;
         case "uploaded-recipes":
           return <UploadedRecipesScreen />;
         case "stock-management":
@@ -181,7 +178,7 @@ export default function App() {
         return <DashboardScreen onNavigate={setActiveSection} />;
       case "sales":
         return <SalesScreen onProceedToCheckout={handleProceedToCheckout} />;
-      case "catalogo":
+      case "catalog":
         return <ProductCatalogScreen onNavigateToCart={handleNavigateToCart} />;
       case "checkout-address":
         return checkoutStep === "address" ? (
@@ -200,13 +197,7 @@ export default function App() {
             onGoToOrders={handleGoToOrders} 
           />
         );
-      
-      // ===============================================
-      // ¡¡¡AQUÍ ESTÁ EL CAMBIO!!! (Línea 218)
-      // Cambié "products" por "mis-recetas" para que 
-      // coincida con el 'handleNavigate' del Dashboard.
-      // ===============================================
-      case "mis-recetas": 
+      case "products":
         return <RecipesScreen />;
       case "upload-recipe":
         return <UploadRecipeScreen />;
