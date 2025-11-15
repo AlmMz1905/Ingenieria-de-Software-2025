@@ -1,0 +1,6 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f0fdf4"/>
+  <circle cx="100" cy="100" r="90" fill="#10b981"/>
+  <path d="M70 100 L90 120 L130 80" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="100" y="160" font-size="20" font-weight="bold" fill="#059669" text-anchor="middle">FarmaGo+</text>
+</svg>
