@@ -46,6 +46,7 @@ export default function App() {
   const [resetEmail, setResetEmail] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [stockItems, setStockItems] = useState<MedicamentoConStock[]>([]);
+  const [cartItems, setCartItems] = useState([]);
   
   // Checkout flow state
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("address");
@@ -219,7 +220,13 @@ export default function App() {
       case "sales":
         return <SalesScreen onProceedToCheckout={handleProceedToCheckout} />;
       case "catalog":
-        return <ProductCatalogScreen onNavigateToCart={handleNavigateToCart} />;
+        return (
+          <ProductCatalogScreen
+            onNavigateToCart={handleNavigateToCart}
+            stockItems={stockItems}
+            setStockItems={setStockItems}
+          />
+        );
       case "checkout-address":
         return checkoutStep === "address" ? (
           <CheckoutAddressScreen onContinue={handleContinueToPayment} onBack={handleBackToCart} />
