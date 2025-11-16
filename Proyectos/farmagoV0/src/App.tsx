@@ -58,7 +58,14 @@ export default function App() {
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
     setAuthView("app");
-    setUserType(accountType as UserType);
+    if (accountType === "farmacia") {
+      // ...nosotros (App.tsx) entendemos "empleado".
+      setUserType("empleado");
+    } else {
+      // Si no, es "cliente"
+      setUserType("cliente");
+    }
+  // setUserType(accountType as UserType);
   };
 
   const handleRegister = (accountType: string, email: string) => {
@@ -304,7 +311,7 @@ export default function App() {
     <>
       <Toaster position="top-right" />
       <div className="h-screen w-screen flex flex-col bg-background">
-        <TopNavigation onLogout={handleLogout} onNavigate={handleNavigate} />
+        <TopNavigation onLogout={handleLogout} onNavigate={handleNavigate} userType={userType} />
         
         <div className="flex flex-1 overflow-hidden">
           <SideNavigation 

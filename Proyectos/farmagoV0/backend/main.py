@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from database import engine, Base
 from routes import users, medications, pharmacies, recipes, orders, auth
+from models import Usuario, Cliente, Farmacia, Medicamento, StockMedicamento, Receta, Pedido
 
 # Load environment variables
 load_dotenv()
@@ -28,14 +29,21 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
+    allow_origins=["http://localhost:3000"],  # ¡El puerto de tu front!
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Permite todos los métodos (POST, GET, etc.)
+    allow_headers=["*"],  # Permite todos los headers
 )
+
+# app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+#)
 
 app.add_middleware(
     TrustedHostMiddleware,

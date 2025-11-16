@@ -5,13 +5,28 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Mail, Lock, Eye, EyeOff, UserCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, UserCircle, AlertTriangle, Loader2 } from "lucide-react";
 import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface LoginScreenProps {
   onLogin: (accountType: string) => void;
   onSwitchToRegister: () => void;
   onForgotPassword?: () => void;
+}
+
+// Interface (Adivinanza) de la respuesta del login
+interface LoginResponse {
+  access_token: string; 
+  token_type: string;
+  user_id: number;
+  user_type: "cliente" | "farmacia"; // ¡El rol de verdad!
+  user: {
+    id: number;
+    email: string;
+    nombre: string; // ¡El nombre de verdad!
+    apellido: string; // ¡El apellido de verdad!
+    user_type: "cliente" | "farmacia";
+  }
 }
 
 export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: LoginScreenProps) {
@@ -21,10 +36,57 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simular inicio de sesión y pasar el tipo de cuenta
-    onLogin(accountType);
+    setLoading(true);
+    setError(null);
+
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      setError("Error: VITE_API_URL no está configurada.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      if (response.status === 401) {
+         throw new Error("Correo electrónico o contraseña incorrectos.");
+      }
+      
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || `Error ${response.status}`);
+      }
+
+      const data: LoginResponse = await response.json();
+
+      localStorage.setItem("authToken", data.access_token);
+      
+      const nombreCompleto = `${data.user.nombre} ${data.user.apellido}`;
+      localStorage.setItem("userName", nombreCompleto); 
+
+      onLogin(data.user_type); 
+
+    } catch (err: any) {
+      console.error("Error en handleSubmit:", err);
+      setError(err.message || "Error al intentar iniciar sesión.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,6 +114,15 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              
+              {/* Mensaje de Error (si existe) */}
+              {error && (
+                <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700">
+                  <AlertTriangle className="h-4 w-4" />
+                  <p className="text-sm font-medium">{error}</p>
+                </div>
+              )}
+
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
@@ -65,6 +136,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -82,6 +154,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10"
                     required
+                    disabled={loading}
                   />
                   <button
                     type="button"
@@ -104,8 +177,9 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                   <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
                   <Select
                     value={accountType}
-                    onValueChange={setAccountType}
+                    onValueChange={setAccountType} // <--- ¡¡¡ARREGLADO!!! (Le saqué la 'V')
                     required
+                    disabled={loading}
                   >
                     <SelectTrigger className="pl-10">
                       <SelectValue placeholder="Selecciona tu tipo de cuenta" />
@@ -116,6 +190,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                     </SelectContent>
                   </Select>
                 </div>
+                {/* --- ¡CAMBIO! ¡Volé el <p> de abajo! --- */}
               </div>
 
               {/* Remember Me */}
@@ -140,6 +215,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                   variant="link"
                   className="p-0 h-auto text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                   onClick={onForgotPassword}
+                  disabled={loading}
                 >
                   ¿Has olvidado tu contraseña?
                 </Button>
@@ -150,9 +226,13 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                 type="submit"
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
                 size="lg"
-                disabled={!accountType}
+                disabled={!accountType || loading} // ¡Ahora esto va a andar!
               >
-                Iniciar Sesión
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Iniciar Sesión"
+                )}
               </Button>
 
               {/* Divider */}
@@ -174,6 +254,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                     variant="link"
                     className="p-0 h-auto text-emerald-600 hover:text-emerald-700 font-semibold"
                     onClick={onSwitchToRegister}
+                    disabled={loading}
                   >
                     Registra una nueva aquí
                   </Button>

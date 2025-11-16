@@ -32,25 +32,28 @@ class Usuario(Base):
     tipo_usuario = Column(String(50), nullable=False)
     fecha_creacion = Column(DateTime, server_default=func.now())
     
-    # Relationships
-    cliente = relationship("Cliente", back_populates="usuario", uselist=False, cascade="all, delete-orphan")
-    farmacia = relationship("Farmacia", back_populates="usuario", uselist=False, cascade="all, delete-orphan")
+    # --- ¡CAMBIO! ---
+    # Sacamos las 'relationships' de acá
+    # porque ahora las maneja la herencia
     
     __mapper_args__ = {
         "polymorphic_identity": "usuario",
         "polymorphic_on": tipo_usuario,
     }
 
-class Cliente(Base):
+# --- ¡¡¡CAMBIO CLAVE!!! ¡Hereda de 'Usuario', no de 'Base'! ---
+class Cliente(Usuario):
     __tablename__ = "clientes"
     
+    # --- ¡CAMBIO! ---
+    # Sacamos el id_usuario porque lo hereda del padre
     id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"), primary_key=True)
     dni = Column(String(20), unique=True, nullable=False, index=True)
     fecha_nacimiento = Column(Date, nullable=True)
     obra_social = Column(String(100), nullable=True)
     
     # Relationships
-    usuario = relationship("Usuario", back_populates="cliente")
+    # Sacamos la 'relationship' a 'Usuario'
     recetas = relationship("Receta", back_populates="cliente", cascade="all, delete-orphan")
     pedidos = relationship("Pedido", back_populates="cliente", cascade="all, delete-orphan")
     
@@ -58,9 +61,12 @@ class Cliente(Base):
         "polymorphic_identity": "cliente",
     }
 
-class Farmacia(Base):
+# --- ¡¡¡CAMBIO CLAVE!!! ¡Hereda de 'Usuario', no de 'Base'! ---
+class Farmacia(Usuario):
     __tablename__ = "farmacias"
     
+    # --- ¡CAMBIO! ---
+    # Sacamos el id_usuario porque lo hereda del padre
     id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"), primary_key=True)
     nombre_comercial = Column(String(150), nullable=False)
     cuit = Column(String(20), unique=True, nullable=False, index=True)
@@ -70,13 +76,14 @@ class Farmacia(Base):
     longitud = Column(Float, nullable=True)
     
     # Relationships
-    usuario = relationship("Usuario", back_populates="farmacia")
+    # Sacamos la 'relationship' a 'Usuario'
     stocks = relationship("StockMedicamento", back_populates="farmacia", cascade="all, delete-orphan")
     pedidos = relationship("Pedido", back_populates="farmacia", cascade="all, delete-orphan")
     
     __mapper_args__ = {
         "polymorphic_identity": "farmacia",
     }
+# --- FIN DE LOS CAMBIOS ---
 
 class Medicamento(Base):
     __tablename__ = "medicamentos"
