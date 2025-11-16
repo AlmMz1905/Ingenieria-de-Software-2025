@@ -31,6 +31,7 @@ import { AccountCreatedScreen } from "./components/AccountCreatedScreen";
 import { PasswordResetRequestScreen } from "./components/PasswordResetRequestScreen";
 import { PasswordResetEmailSentScreen } from "./components/PasswordResetEmailSentScreen";
 import { PasswordResetNewPasswordScreen } from "./components/PasswordResetNewPasswordScreen";
+import { type MedicamentoConStock } from "./components/StockManagementScreen";
 
 type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
@@ -44,6 +45,7 @@ export default function App() {
   const [userType, setUserType] = useState<UserType>("");
   const [resetEmail, setResetEmail] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
+  const [stockItems, setStockItems] = useState<MedicamentoConStock[]>([]);
   
   // Checkout flow state
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("address");
@@ -200,7 +202,7 @@ export default function App() {
             />
           );
         case "stock-management":
-          return <StockManagementScreen />;
+          return <StockManagementScreen stockItems={stockItems} setStockItems={setStockItems} />;
         case "pharmacy-ratings":
           return <PharmacyRatingsScreen />;
         case "settings":
