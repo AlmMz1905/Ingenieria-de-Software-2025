@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Mail, CheckCircle } from 'lucide-react';
-const farmaGoLogo = "/farmago-logo.png";
+import { Mail, CheckCircle } from "lucide-react";
+import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface PasswordResetEmailSentScreenProps {
   email?: string;
@@ -19,7 +19,7 @@ export function PasswordResetEmailSentScreen({
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <img 
-              src={farmaGoLogo || "/placeholder.svg"} 
+              src={farmaGoLogo} 
               alt="FarmaGo+" 
               className="w-32 h-32 drop-shadow-lg"
             />

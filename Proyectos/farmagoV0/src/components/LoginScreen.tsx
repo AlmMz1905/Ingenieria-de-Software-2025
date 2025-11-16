@@ -5,26 +5,26 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Mail, Lock, Eye, EyeOff, UserCircle, Loader2 } from 'lucide-react';
-const farmaGoLogo = "/farmago-logo.png";
+import { Mail, Lock, Eye, EyeOff, UserCircle } from "lucide-react";
+import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface LoginScreenProps {
-  onLogin: (email: string, password: string, accountType: string) => void;
+  onLogin: (accountType: string) => void;
   onSwitchToRegister: () => void;
   onForgotPassword?: () => void;
-  isLoading?: boolean;
 }
 
-export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword, isLoading = false }: LoginScreenProps) {
-  const [email, setEmail] = useState("cliente@test.com");
-  const [password, setPassword] = useState("password123");
-  const [accountType, setAccountType] = useState("cliente");
+export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: LoginScreenProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [accountType, setAccountType] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(email, password, accountType);
+    // Simular inicio de sesión y pasar el tipo de cuenta
+    onLogin(accountType);
   };
 
   return (
@@ -34,7 +34,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword, isL
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <img 
-              src={farmaGoLogo || "/placeholder.svg"} 
+              src={farmaGoLogo} 
               alt="FarmaGo+" 
               className="w-32 h-32 drop-shadow-lg"
             />
@@ -112,7 +112,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword, isL
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="cliente">Cliente</SelectItem>
-                      <SelectItem value="farmacia">Farmacia</SelectItem>
+                      <SelectItem value="empleado">Empleado de Farmacia</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -150,16 +150,9 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword, isL
                 type="submit"
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
                 size="lg"
-                disabled={!accountType || isLoading}
+                disabled={!accountType}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Iniciando...
-                  </>
-                ) : (
-                  "Iniciar Sesión"
-                )}
+                Iniciar Sesión
               </Button>
 
               {/* Divider */}

@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
-import { Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
-const farmaGoLogo = "/farmago-logo.png";
+import { Lock, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
+import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface PasswordResetNewPasswordScreenProps {
   onPasswordReset: (newPassword: string) => void;
@@ -41,7 +41,7 @@ export function PasswordResetNewPasswordScreen({
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <img 
-              src={farmaGoLogo || "/placeholder.svg"} 
+              src={farmaGoLogo} 
               alt="FarmaGo+" 
               className="w-32 h-32 drop-shadow-lg"
             />

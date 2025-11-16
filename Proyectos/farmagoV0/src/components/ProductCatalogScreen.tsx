@@ -1,23 +1,11 @@
-import { useState, useEffect } from "react";
-import { Search, ShoppingCart, Package, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { Search, ShoppingCart, Package, Info } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
-import { toast } from "sonner";
-
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
-interface Product {
-  id_medicamento: string;
-  nombre_comercial: string;
-  precio?: number;
-  image?: string;
-  stock?: number;
-  categoria: string;
-  requiere_receta: boolean;
-  principio_activo: string;
-}
+import { toast } from "sonner@2.0.3";
+import { ProductDetailScreen, Product } from "./ProductDetailScreen";
 
 interface ProductCatalogScreenProps {
   onNavigateToCart?: () => void;
@@ -26,48 +14,130 @@ interface ProductCatalogScreenProps {
 export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [cartItems, setCartItems] = useState<{[key: string]: number}>({});
-  const [medications, setMedications] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    const fetchMedications = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/medications`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
-        const data = await response.json();
-        
-        // Transform backend data to match component expectations
-        const transformedData = data.map((med: any) => ({
-          id_medicamento: med.id_medicamento.toString(),
-          nombre_comercial: med.nombre_comercial,
-          categoria: med.categoria,
-          requiere_receta: med.requiere_receta,
-          principio_activo: med.principio_activo,
-          // Mock data for display (backend doesn't provide these yet)
-          precio: Math.floor(Math.random() * 1000) + 100,
-          stock: Math.floor(Math.random() * 100) + 10,
-          image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400"
-        }));
-        
-        setMedications(transformedData);
-      } catch (error) {
-        console.error("Error fetching medications:", error);
-        toast.error("Error cargando medicamentos");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const products: Product[] = [
+    {
+      id: "P001",
+      name: "Ibuprofeno 400mg",
+      price: 350.00,
+      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
+      stock: 50,
+      category: "Analgésicos",
+      requiresPrescription: false,
+      description: "Analgésico y antiinflamatorio de uso común para dolor leve a moderado",
+      activeIngredient: "Ibuprofeno",
+      presentation: "Comprimidos x 30",
+      laboratory: "Bayer",
+      availabilityStatus: "full",
+    },
+    {
+      id: "P002",
+      name: "Paracetamol 1g",
+      price: 280.00,
+      image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400",
+      stock: 0,
+      category: "Analgésicos",
+      requiresPrescription: false,
+      description: "Analgésico y antipirético para el tratamiento del dolor y la fiebre",
+      activeIngredient: "Paracetamol",
+      presentation: "Comprimidos x 20",
+      laboratory: "Roemmers",
+      availabilityStatus: "out-of-stock",
+      estimatedRestockDays: 5,
+      similarProducts: ["P001", "P005"],
+    },
+    {
+      id: "P003",
+      name: "Amoxicilina 500mg",
+      price: 890.00,
+      image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400",
+      stock: 30,
+      category: "Antibióticos",
+      requiresPrescription: true,
+      description: "Antibiótico de amplio espectro para infecciones bacterianas",
+      activeIngredient: "Amoxicilina",
+      presentation: "Cápsulas x 16",
+      laboratory: "Bagó",
+      availabilityStatus: "full",
+    },
+    {
+      id: "P004",
+      name: "Alcohol en Gel 500ml",
+      price: 450.00,
+      image: "https://images.unsplash.com/photo-1584744982551-1234e1234e1234?w=400",
+      stock: 100,
+      category: "Higiene",
+      requiresPrescription: false,
+      description: "Antiséptico de manos con 70% de alcohol",
+      activeIngredient: "Alcohol Etílico 70%",
+      presentation: "Frasco x 500ml",
+      laboratory: "La Selva",
+      availabilityStatus: "full",
+    },
+    {
+      id: "P005",
+      name: "Omeprazol 20mg",
+      price: 520.00,
+      image: "https://images.unsplash.com/photo-1550572017-4870e1c4d6eb?w=400",
+      stock: 45,
+      category: "Digestivos",
+      requiresPrescription: false,
+      description: "Inhibidor de la bomba de protones para acidez estomacal",
+      activeIngredient: "Omeprazol",
+      presentation: "Cápsulas x 28",
+      laboratory: "Bago",
+      availabilityStatus: "full",
+    },
+    {
+      id: "P006",
+      name: "Vacuna contra la Gripe",
+      price: 3800.00,
+      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
+      stock: 8,
+      category: "Vacunas",
+      requiresPrescription: false,
+      description: "Vacuna antigripal tetravalente para inmunización anual",
+      activeIngredient: "Vacuna Antigripal Inactivada",
+      presentation: "Jeringa prellenada",
+      laboratory: "Sanofi",
+      availabilityStatus: "pickup-only",
+    },
+    {
+      id: "P007",
+      name: "Atorvastatina 20mg",
+      price: 1250.00,
+      image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400",
+      stock: 0,
+      category: "Cardiovascular",
+      requiresPrescription: true,
+      description: "Hipolipemiante para control de colesterol",
+      activeIngredient: "Atorvastatina",
+      presentation: "Comprimidos x 30",
+      laboratory: "Pfizer",
+      availabilityStatus: "out-of-stock",
+      estimatedRestockDays: 7,
+      similarProducts: ["P003"],
+    },
+    {
+      id: "P008",
+      name: "Vitamina C 1000mg",
+      price: 680.00,
+      image: "https://images.unsplash.com/photo-1550572017-4870e1c4d6eb?w=400",
+      stock: 75,
+      category: "Suplementos",
+      requiresPrescription: false,
+      description: "Suplemento vitamínico para reforzar el sistema inmune",
+      activeIngredient: "Ácido Ascórbico",
+      presentation: "Comprimidos efervescentes x 30",
+      laboratory: "Redoxon",
+      availabilityStatus: "full",
+    }
+  ];
 
-    fetchMedications();
-  }, []);
-
-  const filteredProducts = medications.filter(product =>
-    product.nombre_comercial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.categoria.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddToCart = (product: Product) => {
@@ -78,24 +148,39 @@ export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenP
 
     setCartItems(prev => ({
       ...prev,
-      [product.id_medicamento]: (prev[product.id_medicamento] || 0) + 1
+      [product.id]: (prev[product.id] || 0) + 1
     }));
 
-    toast.success(`${product.nombre_comercial} agregado al carrito.`);
+    toast.success(`${product.name} agregado al carrito.`);
   };
 
   const getTotalCartItems = () => {
     return Object.values(cartItems).reduce((sum, count) => sum + count, 0);
   };
 
-  if (isLoading) {
+  const handleProductDetail = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleBackToCatalog = () => {
+    setSelectedProduct(null);
+  };
+
+  const handleAddToCartFromDetail = (product: Product, deliveryMethod: "delivery" | "pickup") => {
+    setCartItems(prev => ({
+      ...prev,
+      [product.id]: (prev[product.id] || 0) + 1
+    }));
+  };
+
+  // Si hay un producto seleccionado, mostrar el detalle
+  if (selectedProduct) {
     return (
-      <div className="flex-1 p-6 space-y-6 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mx-auto mb-3" />
-          <p className="text-gray-600">Cargando medicamentos...</p>
-        </div>
-      </div>
+      <ProductDetailScreen
+        product={selectedProduct}
+        onBack={handleBackToCatalog}
+        onAddToCart={handleAddToCartFromDetail}
+      />
     );
   }
 
@@ -140,11 +225,11 @@ export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenP
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredProducts.map((product) => {
           const isOutOfStock = product.stock === 0;
-          const inCart = cartItems[product.id_medicamento] || 0;
+          const inCart = cartItems[product.id] || 0;
 
           return (
             <Card 
-              key={product.id_medicamento} 
+              key={product.id} 
               className={`border-2 border-emerald-100 shadow-lg overflow-hidden transition-all ${
                 isOutOfStock 
                   ? 'opacity-60' 
@@ -154,8 +239,8 @@ export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenP
               <CardHeader className="p-0 relative">
                 <div className="relative h-48 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50">
                   <img
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.nombre_comercial}
+                    src={product.image}
+                    alt={product.name}
                     className={`w-full h-full object-cover ${isOutOfStock ? 'grayscale' : ''}`}
                   />
                   {isOutOfStock && (
@@ -165,7 +250,7 @@ export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenP
                       </Badge>
                     </div>
                   )}
-                  {product.requiere_receta && !isOutOfStock && (
+                  {product.requiresPrescription && !isOutOfStock && (
                     <Badge className="absolute top-2 right-2 bg-yellow-500 text-white">
                       Requiere Receta
                     </Badge>
@@ -180,16 +265,15 @@ export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenP
               <CardContent className="p-4">
                 <div className="mb-2">
                   <Badge variant="outline" className="text-xs text-emerald-700 border-emerald-300">
-                    {product.categoria}
+                    {product.category}
                   </Badge>
                 </div>
                 <CardTitle className="text-lg mb-2 text-emerald-900">
-                  {product.nombre_comercial}
+                  {product.name}
                 </CardTitle>
-                <p className="text-sm text-gray-600 mb-2">{product.principio_activo}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-emerald-600">
-                    ${product.precio?.toFixed(2)}
+                    ${product.price.toFixed(2)}
                   </span>
                   {!isOutOfStock && (
                     <span className="text-sm text-gray-500">
@@ -198,7 +282,15 @@ export function ProductCatalogScreen({ onNavigateToCart }: ProductCatalogScreenP
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="p-4 pt-0">
+              <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+                <Button
+                  onClick={() => handleProductDetail(product)}
+                  variant="outline"
+                  className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                >
+                  <Info className="h-4 w-4 mr-2" />
+                  Ver Disponibilidad
+                </Button>
                 <Button
                   onClick={() => handleAddToCart(product)}
                   disabled={isOutOfStock}

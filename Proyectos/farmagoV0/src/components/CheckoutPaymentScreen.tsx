@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { CreditCard, Plus, ChevronRight, ChevronLeft, AlertCircle, Lock, Loader2 } from 'lucide-react';
+import { CreditCard, Plus, ChevronRight, ChevronLeft, AlertCircle, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,8 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface PaymentMethod {
   id: number;
@@ -60,8 +57,8 @@ export function CheckoutPaymentScreen({
   const [showAddNew, setShowAddNew] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [paymentError, setPaymentError] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   
+  // Form for new payment method
   const [newPayment, setNewPayment] = useState({
     cardNumber: "",
     cardName: "",
@@ -74,33 +71,17 @@ export function CheckoutPaymentScreen({
   const subtotal = orderTotal;
   const total = subtotal + deliveryFee;
 
-  const handleConfirmPayment = async () => {
-    setIsProcessing(true);
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // For now, just simulate success (real implementation would call backend)
-      const paymentSucceeds = Math.random() > 0.2;
+  const handleConfirmPayment = () => {
+    // Simulate payment processing with 20% chance of failure
+    const paymentSucceeds = Math.random() > 0.2;
 
-      if (!paymentSucceeds) {
-        setPaymentError("Error en el pago. Por favor, verifica los datos de tu tarjeta e inténtalo nuevamente.");
-        setShowErrorDialog(true);
-        setIsProcessing(false);
-        return;
-      }
-
-      toast.success("Pago procesado exitosamente");
-      onConfirmPayment(selectedPaymentId);
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      setPaymentError("Error al procesar el pago. Intenta nuevamente.");
+    if (!paymentSucceeds) {
+      setPaymentError("Error en el pago. Por favor, verifica los datos de tu tarjeta e inténtalo nuevamente.");
       setShowErrorDialog(true);
-    } finally {
-      setIsProcessing(false);
+      return;
     }
+
+    onConfirmPayment(selectedPaymentId);
   };
 
   const validateNewPayment = () => {
@@ -368,26 +349,15 @@ export function CheckoutPaymentScreen({
                   <>
                     <Button
                       onClick={handleConfirmPayment}
-                      disabled={isProcessing}
                       className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg mb-3"
                       size="lg"
                     >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Procesando...
-                        </>
-                      ) : (
-                        <>
-                          Confirmar y Pagar
-                          <ChevronRight className="h-4 w-4 ml-2" />
-                        </>
-                      )}
+                      Confirmar y Pagar
+                      <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                     <Button
                       variant="outline"
                       onClick={onBack}
-                      disabled={isProcessing}
                       className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50"
                     >
                       <ChevronLeft className="h-4 w-4 mr-2" />

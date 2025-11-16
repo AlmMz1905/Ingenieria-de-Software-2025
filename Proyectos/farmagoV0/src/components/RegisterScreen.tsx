@@ -3,19 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
-import { Mail, Lock, User, Phone, MapPin, Eye, EyeOff, UserCircle, ShoppingBag, Building2, ArrowLeft, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, Eye, EyeOff, UserCircle, ShoppingBag, Truck, Building2, ArrowLeft } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
-const farmaGoLogo = "/farmago-logo.png";
+import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface RegisterScreenProps {
   onRegister: (accountType: string, email: string) => void;
   onSwitchToLogin: () => void;
-  isLoading?: boolean;
 }
 
-type UserType = "cliente" | "farmacia" | "";
+type UserType = "cliente" | "empleado" | "";
 
-export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false }: RegisterScreenProps) {
+export function RegisterScreen({ onRegister, onSwitchToLogin }: RegisterScreenProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -40,6 +39,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Simular registro y pasar el tipo de cuenta
     onRegister(formData.userType, formData.email);
   };
 
@@ -66,8 +66,8 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
       color: "from-emerald-500 to-teal-500",
     },
     {
-      type: "farmacia" as UserType,
-      title: "Farmacia",
+      type: "empleado" as UserType,
+      title: "Empleado de Farmacia",
       description: "Gestiona inventario y atiende clientes",
       icon: Building2,
       color: "from-teal-500 to-emerald-600",
@@ -77,10 +77,11 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-6">
       <div className="w-full max-w-2xl">
+        {/* Logo y título principal */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <img 
-              src={farmaGoLogo || "/placeholder.svg"} 
+              src={farmaGoLogo} 
               alt="FarmaGo+" 
               className="w-32 h-32 drop-shadow-lg"
             />
@@ -102,6 +103,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* STEP 1: Selección de Tipo de Cuenta */}
             {step === 1 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-4">
@@ -155,6 +157,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                   })}
                 </div>
 
+                {/* Botón Continuar */}
                 <Button
                   type="button"
                   onClick={handleContinueToStep2}
@@ -165,6 +168,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                   Continuar
                 </Button>
 
+                {/* Divider */}
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300"></div>
@@ -174,6 +178,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                   </div>
                 </div>
 
+                {/* Login Link */}
                 <div className="text-center">
                   <p className="text-sm text-gray-600">
                     ¿Ya tienes una cuenta creada?{" "}
@@ -190,8 +195,10 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
               </div>
             )}
 
+            {/* STEP 2: Formulario de Datos Personales */}
             {step === 2 && (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Botón Volver */}
                 <Button
                   type="button"
                   variant="ghost"
@@ -202,13 +209,14 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                   Volver
                 </Button>
 
+                {/* Badge del tipo de cuenta seleccionado */}
                 <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg mb-4">
                   <div className="flex items-center gap-2">
                     <UserCircle className="h-5 w-5 text-emerald-600" />
                     <span className="text-sm text-emerald-700">
                       Tipo de cuenta: <span className="font-semibold">
                         {formData.userType === "cliente" && "Cliente"}
-                        {formData.userType === "farmacia" && "Farmacia"}
+                        {formData.userType === "empleado" && "Empleado de Farmacia"}
                       </span>
                     </span>
                   </div>
@@ -278,6 +286,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                         value={formData.phone}
                         onChange={handleChange}
                         className="pl-10"
+                        required
                       />
                     </div>
                   </div>
@@ -294,6 +303,7 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                         value={formData.address}
                         onChange={handleChange}
                         className="pl-10"
+                        required
                       />
                     </div>
                   </div>
@@ -383,22 +393,16 @@ export function RegisterScreen({ onRegister, onSwitchToLogin, isLoading = false 
                   type="submit"
                   className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
                   size="lg"
-                  disabled={!acceptTerms || isLoading}
+                  disabled={!acceptTerms}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creando cuenta...
-                    </>
-                  ) : (
-                    "Crear Cuenta"
-                  )}
+                  Crear Cuenta
                 </Button>
               </form>
             )}
           </CardContent>
         </Card>
 
+        {/* Additional Info - Solo mostrar en step 1 */}
         {step === 1 && (
           <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl shadow-md">
             <h3 className="font-semibold text-emerald-900 mb-2">Beneficios de registrarte:</h3>

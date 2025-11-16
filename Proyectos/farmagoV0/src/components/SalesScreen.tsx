@@ -1,21 +1,16 @@
-import { useState, useEffect } from "react";
-import { Search, Plus, Minus, Trash2 } from 'lucide-react';
+import { useState } from "react";
+import { Search, Plus, Minus, Trash2 } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { toast } from "sonner";
-
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface CartItem {
   id: string;
-  id_medicamento: number;
-  nombre_comercial: string;
-  barcode?: string;
+  name: string;
+  barcode: string;
   quantity: number;
   price: number;
-  requiere_receta: boolean;
 }
 
 interface SalesScreenProps {
@@ -25,38 +20,14 @@ interface SalesScreenProps {
 export function SalesScreen({ onProceedToCheckout }: SalesScreenProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [cartItems, setCartItems] = useState<CartItem[]>([
-    { 
-      id: "1", 
-      id_medicamento: 1,
-      nombre_comercial: "Ibuprofeno 400mg", 
-      barcode: "123456789", 
-      quantity: 2, 
-      price: 350.00,
-      requiere_receta: false
-    },
-    { 
-      id: "2", 
-      id_medicamento: 2,
-      nombre_comercial: "Paracetamol 500mg", 
-      barcode: "987654321", 
-      quantity: 1, 
-      price: 280.00,
-      requiere_receta: false
-    },
-    { 
-      id: "3", 
-      id_medicamento: 4,
-      nombre_comercial: "Alcohol en Gel 500ml", 
-      barcode: "456789123", 
-      quantity: 1, 
-      price: 450.00,
-      requiere_receta: false
-    },
+    { id: "1", name: "Ibuprofeno 400mg", barcode: "123456789", quantity: 2, price: 350.00 },
+    { id: "2", name: "Paracetamol 500mg", barcode: "987654321", quantity: 1, price: 280.00 },
+    { id: "3", name: "Alcohol en Gel 500ml", barcode: "456789123", quantity: 1, price: 450.00 },
   ]);
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
   const discount = 0;
-  const tax = subtotal * 0.21;
+  const tax = subtotal * 0.21; // IVA 21%
   const total = subtotal - discount + tax;
 
   const updateQuantity = (id: string, change: number) => {
@@ -71,21 +42,6 @@ export function SalesScreen({ onProceedToCheckout }: SalesScreenProps) {
 
   const removeItem = (id: string) => {
     setCartItems(items => items.filter(item => item.id !== id));
-    toast.success("Producto removido del carrito");
-  };
-
-  const handleCheckout = () => {
-    if (cartItems.length === 0) {
-      toast.error("El carrito está vacío");
-      return;
-    }
-    
-    const itemsWithRecipe = cartItems.filter(item => item.requiere_receta);
-    if (itemsWithRecipe.length > 0) {
-      toast.info("Se requieren recetas para algunos medicamentos");
-    }
-    
-    onProceedToCheckout?.();
   };
 
   return (
@@ -116,71 +72,67 @@ export function SalesScreen({ onProceedToCheckout }: SalesScreenProps) {
         <div className="col-span-2">
           <Card className="border-2 border-emerald-100 shadow-lg">
             <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
-              <CardTitle className="text-emerald-900">Productos en el Carrito ({cartItems.length})</CardTitle>
+              <CardTitle className="text-emerald-900">Productos en el Carrito</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              {cartItems.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">El carrito está vacío</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-emerald-900">Producto</TableHead>
-                      <TableHead className="text-center text-emerald-900">Cantidad</TableHead>
-                      <TableHead className="text-right text-emerald-900">Precio</TableHead>
-                      <TableHead className="text-right text-emerald-900">Subtotal</TableHead>
-                      <TableHead className="w-16"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {cartItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-semibold text-gray-900">{item.nombre_comercial}</div>
-                            {item.barcode && <div className="text-sm text-gray-500">Código: {item.barcode}</div>}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0 border-emerald-300 hover:bg-emerald-100"
-                              onClick={() => updateQuantity(item.id, -1)}
-                            >
-                              <Minus className="h-3 w-3 text-emerald-600" />
-                            </Button>
-                            <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0 border-emerald-300 hover:bg-emerald-100"
-                              onClick={() => updateQuantity(item.id, 1)}
-                            >
-                              <Plus className="h-3 w-3 text-emerald-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">${item.price.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-semibold text-emerald-700">
-                          ${(item.quantity * item.price).toFixed(2)}
-                        </TableCell>
-                        <TableCell>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-emerald-900">Producto</TableHead>
+                    <TableHead className="text-center text-emerald-900">Cantidad</TableHead>
+                    <TableHead className="text-right text-emerald-900">Precio</TableHead>
+                    <TableHead className="text-right text-emerald-900">Subtotal</TableHead>
+                    <TableHead className="w-16"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cartItems.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-semibold text-gray-900">{item.name}</div>
+                          <div className="text-sm text-gray-500">Código: {item.barcode}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center space-x-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100"
-                            onClick={() => removeItem(item.id)}
+                            className="h-8 w-8 p-0 border-emerald-300 hover:bg-emerald-100"
+                            onClick={() => updateQuantity(item.id, -1)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Minus className="h-3 w-3 text-emerald-600" />
                           </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+                          <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0 border-emerald-300 hover:bg-emerald-100"
+                            onClick={() => updateQuantity(item.id, 1)}
+                          >
+                            <Plus className="h-3 w-3 text-emerald-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">${item.price.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-semibold text-emerald-700">
+                        ${(item.quantity * item.price).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </div>
@@ -213,23 +165,14 @@ export function SalesScreen({ onProceedToCheckout }: SalesScreenProps) {
               </div>
 
               <div className="space-y-3 pt-4">
-                <Button 
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg" 
-                  size="lg" 
-                  onClick={handleCheckout}
-                  disabled={cartItems.length === 0}
-                >
+                <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg" size="lg" onClick={onProceedToCheckout}>
                   Finalizar Compra
                 </Button>
                 <Button variant="outline" className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50">
                   Agregar Descuento
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
-                  onClick={() => setCartItems([])}
-                >
-                  Vaciar Carrito
+                <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
+                  Cancelar Pedido
                 </Button>
               </div>
             </CardContent>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Bell, ChevronDown, User, CreditCard, LogOut, HelpCircle } from 'lucide-react';
+import { Bell, ChevronDown, User, CreditCard, LogOut, HelpCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { NotificationsPanel } from "./NotificationsPanel";
-const farmaGoLogo = "/farmago-logo.png";
+import farmaGoLogo from "figma:asset/de0da3dcf17f0bdd26c5b82838995987a94fac52.png";
 
 interface TopNavigationProps {
   onLogout?: () => void;
@@ -31,7 +31,7 @@ export function TopNavigation({ onLogout, onNavigate }: TopNavigationProps) {
     <div className="h-16 bg-white border-b border-emerald-200 flex items-center justify-between px-6 shadow-sm">
       <div className="flex items-center space-x-3">
         <img 
-          src={farmaGoLogo || "/placeholder.svg"} 
+          src={farmaGoLogo} 
           alt="FarmaGo+" 
           className="w-10 h-10"
         />

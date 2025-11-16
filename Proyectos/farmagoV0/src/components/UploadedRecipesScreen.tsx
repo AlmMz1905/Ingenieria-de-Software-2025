@@ -4,7 +4,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import {
@@ -409,6 +409,9 @@ export function UploadedRecipesScreen() {
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Validar Receta - {selectedRecipe?.id}</DialogTitle>
+            <DialogDescription className="sr-only">
+              Revisar y validar la receta médica cargada por el paciente
+            </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-6 h-[70vh]">
             {/* Left Panel - Image */}
@@ -535,6 +538,9 @@ export function UploadedRecipesScreen() {
               <AlertTriangle className="h-5 w-5" />
               Motivo de Rechazo
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Selecciona el motivo por el cual se rechaza la receta médica
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
