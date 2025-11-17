@@ -12,6 +12,7 @@ sys.path.insert(0, PARENT_DIR)
 
 from database import SessionLocal, engine, Base
 from models import Usuario, Cliente, Farmacia, Medicamento, StockMedicamento
+from models import Direccion, MetodoDePago
 from utils.security import hash_password
 
 def seed_database():
@@ -112,6 +113,47 @@ def seed_database():
         )
         db.add(cliente)
         db.commit() # Guardamos el cliente
+        
+        # --- ¡NUEVO! Agregamos Direcciones y Pagos al cliente ---
+        print("Agregando direcciones y pagos al cliente de prueba...")
+        
+        # Direcciones de ejemplo
+        direccion1 = Direccion(
+            id_cliente=cliente.id_usuario,
+            alias="Casa",
+            calle_numero="Calle 7 N° 822",
+            ciudad="La Plata",
+            provincia="Buenos Aires",
+            es_predeterminada=True
+        )
+        direccion2 = Direccion(
+            id_cliente=cliente.id_usuario,
+            alias="Trabajo",
+            calle_numero="Av. 51 N° 1234",
+            ciudad="La Plata",
+            provincia="Buenos Aires"
+        )
+        db.add_all([direccion1, direccion2])
+        
+        # Métodos de pago de ejemplo
+        pago1 = MetodoDePago(
+            id_cliente=cliente.id_usuario,
+            tipo="Visa",
+            ultimos_cuatro="4242",
+            fecha_expiracion="12/26",
+            nombre_titular="Juan García",
+            es_predeterminado=True
+        )
+        pago2 = MetodoDePago(
+            id_cliente=cliente.id_usuario,
+            tipo="Mastercard",
+            ultimos_cuatro="8888",
+            fecha_expiracion="09/25",
+            nombre_titular="Juan García"
+        )
+        db.add_all([pago1, pago2])
+        
+        db.commit() # Guardamos las direcciones y pagos
         
         # Create medications
         medicamentos_data = [

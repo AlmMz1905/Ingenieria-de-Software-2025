@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; // <-- ¡'useEffect' es clave!
 import { Search, ShoppingCart, Package, Info, Loader2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -6,7 +6,6 @@ import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
 import { toast } from "sonner";
 import { ProductDetailScreen, Product } from "./ProductDetailScreen";
-// ¡Importamos las 'interfaces' del Padre!
 import { type MedicamentoConStock, type CartItem } from "../App"; 
 
 // --- (Props que nos pasa App.tsx) ---
@@ -31,10 +30,56 @@ export function ProductCatalogScreen({
   // ¡Este componente ahora es "bobo"!
   // Solo "dibuja" el 'stockItems' que le da el Padre.
   // --- FIN DEL CAMBIO ---
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  interface ApiMedicamento {
+    id_medicamento: number; 
+    nombre_comercial: string;
+    principio_activo: string;
+    requiere_receta: boolean;
+    categoria: string;
+    presentacion: string;
+    laboratorio: string;
+  }
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        if (!apiUrl) throw new Error("VITE_API_URL no está configurada");
 
+        const response = await fetch(`${apiUrl}/medications/`);
+        
+        if (!response.ok) throw new Error("Error al conectar con el backend.");
+        
+        const dataApi: ApiMedicamento[] = await response.json();
+        
+        const dataConStock = dataApi.map(med => {
+          const stock = Math.floor(Math.random() * 80) + 20;
+          const precio = parseFloat((Math.random() * 2000 + 500).toFixed(2));
+          return { ...med, stock: stock, precio: precio, minStock: 20 };
+        });
+        
+        setStockItems(dataConStock); 
+      } catch (err: any) {
+        setError(err.message || "Error desconocido");
+        toast.error(err.message || "Error al cargar productos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (stockItems.length === 0) {
+      fetchProducts();
+    } else {
+      setLoading(false); 
+    }
+  }, []); // <-- El '[]' es clave
+  
   // ¡Filtramos el 'stockItems' del Padre!
   const filteredProducts = stockItems.filter(product =>
     (product.nombre_comercial && product.nombre_comercial.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -108,6 +153,30 @@ export function ProductCatalogScreen({
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 ... flex-1 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-lg text-emerald-700">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Cargando inventario...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 space-y-6 ... flex-1 flex items-center justify-center">
+        <Card className="border-2 border-red-200 bg-red-50">
+          <CardContent className="p-12 text-center">
+            <Info className="h-12 w-12 text-red-400 mx-auto mb-3" />
+            <p className="text-red-700 ...">¡Ups! Algo salió mal</p>
+            <p className="text-gray-600 mt-2">{error}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   // --- (Manejo de 'selectedProduct', igual que antes) ---
   if (selectedProduct) {
     return (
@@ -157,21 +226,6 @@ export function ProductCatalogScreen({
           </div>
         </CardContent>
       </Card>
-      
-      {/* --- ¡CAMBIO! ¡Este es el estado si la Farmacia NUNCA cargó el stock! --- */}
-      {/* ¡Este es el "Cargando Inventario..." que vos viste! */}
-      {stockItems.length === 0 && (
-         <Card className="border-2 border-yellow-200 bg-yellow-50">
-          <CardContent className="p-12 text-center">
-            <Loader2 className="h-12 w-12 text-yellow-400 mx-auto mb-3 animate-spin" />
-            <p className="text-yellow-700">Cargando inventario...</p>
-            <p className="text-sm text-gray-500">
-              (Si sos el administrador, por favor, iniciá sesión como Farmacia
-              primero para cargar el inventario).
-            </p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -290,4 +344,5 @@ export function ProductCatalogScreen({
       )}
     </div>
   );
+  
 }

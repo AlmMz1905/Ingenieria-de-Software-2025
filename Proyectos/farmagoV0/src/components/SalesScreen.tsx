@@ -1,11 +1,27 @@
-import { useState } from "react";
-import { Search, Plus, Minus, Trash2, ShoppingCart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Plus, Minus, Trash2, ShoppingCart, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { type CartItem } from "../App"; 
+import { toast } from "sonner";
 
+// --- Interfaces ---
+interface Direccion {
+  id_direccion: number;
+  alias: string;
+  calle_numero: string;
+  ciudad: string;
+  provincia: string;
+  es_predeterminada: boolean;
+}
+
+interface ClienteResponse {
+  direcciones: Direccion[];
+}
+
+// --- Props ---
 interface SalesScreenProps {
   onProceedToCheckout?: () => void;
   cart: CartItem[];
@@ -19,13 +35,62 @@ export function SalesScreen({
 }: SalesScreenProps) {
   const [searchTerm, setSearchTerm] = useState("");
   
+  // --- Estados para el perfil ---
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [hasAddresses, setHasAddresses] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const cartItems = cart;
 
+  // --- Cálculos ---
   const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * (item.precio || 0)), 0);
   const discount = 0;
-  const tax = subtotal * 0.21; // IVA 21%
+  const tax = subtotal * 0.21;
   const total = subtotal - discount + tax;
 
+  // --- useEffect para verificar las direcciones ---
+  useEffect(() => {
+    const checkUserAddresses = async () => {
+      setLoadingProfile(true);
+      setError(null);
+      const token = localStorage.getItem("authToken");
+      const apiUrl = import.meta.env.VITE_API_URL;
+
+      if (!token || !apiUrl) {
+        setError("No estás autenticado.");
+        setLoadingProfile(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/users/profile`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+          throw new Error("No se pudo cargar tu perfil.");
+        }
+        
+        const data: ClienteResponse = await response.json();
+        
+        if (data.direcciones && data.direcciones.length > 0) {
+          setHasAddresses(true);
+        } else {
+          setHasAddresses(false);
+        }
+        
+      } catch (err: any) {
+        setError(err.message);
+        toast.error(err.message);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    
+    checkUserAddresses();
+  }, []);
+
+  // --- Funciones del Carrito ---
   const updateQuantity = (id: number, change: number) => {
     setCart(items => 
       items.map(item => 
@@ -45,16 +110,17 @@ export function SalesScreen({
   );
 
 
+  // --- Render ---
   return (
     <div className="p-6 space-y-6 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
       
-      {/* (Header, igual que antes) */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
         <h2 className="text-3xl font-semibold mb-2">Carrito de Compras</h2>
         <p className="text-emerald-50">Revisa y gestiona tus productos</p>
       </div>
 
-      {/* (Search Bar, igual que antes) */}
+      {/* Search Bar */}
       <Card className="border-2 border-emerald-100">
         <CardContent className="p-4">
           <div className="relative">
@@ -70,7 +136,7 @@ export function SalesScreen({
       </Card>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Cart Items */}
+        {/* ¡¡¡ESTA ES LA PARTE QUE FALTABA!!! */}
         <div className="col-span-2">
           <Card className="border-2 border-emerald-100 shadow-lg">
             <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
@@ -85,7 +151,6 @@ export function SalesScreen({
                 </div>
               ) : (
                 <Table>
-                  {/* (TableHeader, igual que antes) */}
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-emerald-900">Producto</TableHead>
@@ -147,6 +212,8 @@ export function SalesScreen({
             </CardContent>
           </Card>
         </div>
+        {/* ¡¡¡FIN DE LA PARTE QUE FALTABA!!! */}
+
 
         {/* Invoice Summary */}
         <div>
@@ -155,7 +222,7 @@ export function SalesScreen({
               <CardTitle className="text-emerald-900">Resumen de Compra</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
-              {/* (El resumen ahora usa los cálculos REALES) */}
+              
               <div className="space-y-3">
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal:</span>
@@ -176,16 +243,43 @@ export function SalesScreen({
                 </div>
               </div>
 
+              <div className="space-y-2 pt-2">
+                {loadingProfile && (
+                  <div className="flex items-center justify-center gap-2 text-emerald-600 p-3 bg-emerald-50 rounded-md">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Verificando direcciones...</span>
+                  </div>
+                )}
+                
+                {error && (
+                  <div className="flex items-center justify-center gap-2 text-red-600 p-3 bg-red-50 rounded-md">
+                    <AlertCircle className="h-4 w-4" />
+                    <span className="text-sm">{error}</span>
+                  </div>
+                )}
+
+                {!loadingProfile && !hasAddresses && !error && (
+                  <div className="flex items-start gap-3 text-yellow-800 p-3 bg-yellow-50 rounded-md border border-yellow-200">
+                    <AlertCircle className="h-4 w-4 mt-1 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold">¡Falta un paso!</p>
+                      <p>Para comprar, debés agregar al menos una dirección en tu perfil.
+                         Andá a <span className="font-bold">Configuración de perfil {'>'} Direcciones</span>.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3 pt-4">
                 <Button 
                   className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg" 
                   size="lg" 
                   onClick={onProceedToCheckout}
-                  disabled={cartItems.length === 0}
+                  disabled={cartItems.length === 0 || loadingProfile || !hasAddresses}
                 >
                   Finalizar Compra
                 </Button>
-                {/* --- ¡¡¡CAMBIO!!! ¡Volé el botón de Descuento! --- */}
                 <Button 
                   variant="outline" 
                   className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"

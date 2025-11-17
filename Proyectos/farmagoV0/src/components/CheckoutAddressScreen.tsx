@@ -1,108 +1,188 @@
-import { useState } from "react";
-import { MapPin, Plus, ChevronRight, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPin, Plus, ChevronRight, AlertCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { toast } from "sonner";
 
-interface Address {
-  id: number;
-  name: string;
-  address: string;
-  isDefault: boolean;
+// --- Interfaces ---
+interface Direccion {
+  id_direccion: number;
+  alias: string;
+  calle_numero: string;
+  ciudad: string;
+  provincia: string;
+  codigo_postal: string | null;
+  es_predeterminada: boolean;
 }
 
+interface ClienteResponse {
+  direcciones: Direccion[];
+}
+
+// --- Props ---
 interface CheckoutAddressScreenProps {
   onContinue: (addressId: number) => void;
   onBack: () => void;
 }
 
 export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScreenProps) {
-  const [savedAddresses, setSavedAddresses] = useState<Address[]>([
-    {
-      id: 1,
-      name: "Casa",
-      address: "Calle 7 N° 822, La Plata, Buenos Aires",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: "Trabajo",
-      address: "Av. 51 N° 1234, La Plata, Buenos Aires",
-      isDefault: false,
-    },
-  ]);
-
-  const [selectedAddressId, setSelectedAddressId] = useState<number>(1);
+  
+  // --- Estados de data y carga ---
+  const [savedAddresses, setSavedAddresses] = useState<Direccion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // --- Estados de UI ---
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [showAddNew, setShowAddNew] = useState(false);
   
-  // Form for new address
+  // --- Estados del formulario ---
   const [newAddress, setNewAddress] = useState({
-    name: "",
-    street: "",
-    number: "",
-    city: "",
-    province: "",
+    alias: "",
+    calle_numero: "",
+    ciudad: "",
+    provincia: "",
+    codigo_postal: ""
   });
-
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
 
-  const handleContinue = () => {
-    if (savedAddresses.length === 0) {
-      // Must add address first
-      return;
-    }
-    
-    if (!selectedAddressId) {
-      setFormErrors({ general: "Por favor, selecciona una dirección de entrega." });
-      return;
-    }
 
+  // --- Carga de Direcciones ---
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem("authToken");
+      const apiUrl = import.meta.env.VITE_API_URL;
+
+      if (!token || !apiUrl) {
+        setError("No estás autenticado o la API no está configurada.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/users/profile`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.detail || "No se pudieron cargar tus direcciones.");
+        }
+        
+        const data: ClienteResponse = await response.json();
+        setSavedAddresses(data.direcciones);
+        
+        if (data.direcciones.length > 0) {
+          const defaultAddr = data.direcciones.find(d => d.es_predeterminada);
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr.id_direccion);
+          } else {
+            setSelectedAddressId(data.direcciones[0].id_direccion);
+          }
+        }
+        
+      } catch (err: any) {
+        setError(err.message);
+        toast.error(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchAddresses();
+  }, []);
+
+
+  // --- Lógica de Continuar ---
+  const handleContinue = () => {
+    if (!selectedAddressId) {
+      toast.error("Por favor, selecciona o agrega una dirección de entrega.");
+      return;
+    }
     onContinue(selectedAddressId);
   };
 
+
+  // --- (Maqueta) Lógica de Agregar Dirección ---
   const validateNewAddress = () => {
     const errors: {[key: string]: string} = {};
-
-    if (!newAddress.name.trim()) errors.name = "El nombre es obligatorio";
-    if (!newAddress.street.trim()) errors.street = "La calle es obligatoria";
-    if (!newAddress.number.trim()) errors.number = "El número es obligatorio";
-    if (!newAddress.city.trim()) errors.city = "La ciudad es obligatoria";
-    if (!newAddress.province.trim()) errors.province = "La provincia es obligatoria";
-
+    if (!newAddress.alias.trim()) errors.alias = "El alias es obligatorio";
+    if (!newAddress.calle_numero.trim()) errors.calle_numero = "La calle y número son obligatorios";
+    if (!newAddress.ciudad.trim()) errors.ciudad = "La ciudad es obligatoria";
+    if (!newAddress.provincia.trim()) errors.provincia = "La provincia es obligatoria";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSaveNewAddress = () => {
-    if (!validateNewAddress()) {
-      return;
-    }
+    if (!validateNewAddress()) return;
 
-    const address: Address = {
-      id: savedAddresses.length + 1,
-      name: newAddress.name,
-      address: `${newAddress.street} N° ${newAddress.number}, ${newAddress.city}, ${newAddress.province}`,
-      isDefault: savedAddresses.length === 0,
+    const tempAddress: Direccion = {
+      id_direccion: Date.now(),
+      alias: newAddress.alias,
+      calle_numero: newAddress.calle_numero,
+      ciudad: newAddress.ciudad,
+      provincia: newAddress.provincia,
+      codigo_postal: newAddress.codigo_postal,
+      es_predeterminada: savedAddresses.length === 0,
     };
 
-    setSavedAddresses([...savedAddresses, address]);
-    setSelectedAddressId(address.id);
+    setSavedAddresses([...savedAddresses, tempAddress]);
+    setSelectedAddressId(tempAddress.id_direccion);
     setShowAddNew(false);
-    setNewAddress({ name: "", street: "", number: "", city: "", province: "" });
+    setNewAddress({ alias: "", calle_numero: "", ciudad: "", provincia: "", codigo_postal: "" });
     setFormErrors({});
+    toast.success("Dirección agregada temporalmente.");
   };
+  
+  
+  // --- Pantallas de Carga y Error ---
+  if (loading) {
+    return (
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-emerald-500 animate-spin" />
+      </div>
+    );
+  }
 
+  if (error) {
+     return (
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <Card className="border-2 border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-700 flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Error al cargar direcciones
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-800">{error}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Reintentar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+
+  // --- Render ---
   return (
-    <div className="flex-1 p-6 space-y-6 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
+    <div className="flex-1 p-6 space-y-6 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/5J0">
+      
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
         <h2 className="text-3xl font-semibold mb-2">Dirección de Entrega</h2>
         <p className="text-emerald-50">Paso 1 de 2 - Selecciona dónde quieres recibir tu pedido</p>
       </div>
 
-      {/* Progress Indicator */}
+      {/* ¡¡¡ESTA ES LA PARTE QUE FALTABA!!! */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -119,6 +199,7 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
         </div>
       </div>
 
+      {/* Lógica de "Sin Direcciones" */}
       {savedAddresses.length === 0 && !showAddNew && (
         <Card className="border-2 border-yellow-200 bg-yellow-50">
           <CardContent className="p-6">
@@ -144,6 +225,7 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
         </Card>
       )}
 
+      {/* Lógica de "Mostrar Direcciones" (¡con las clases BIEN!) */}
       {savedAddresses.length > 0 && !showAddNew && (
         <>
           <Card className="border-2 border-emerald-100 shadow-lg">
@@ -159,33 +241,35 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
               </Button>
             </CardHeader>
             <CardContent className="p-6">
-              <RadioGroup value={selectedAddressId.toString()} onValueChange={(val) => setSelectedAddressId(parseInt(val))}>
+              <RadioGroup value={selectedAddressId?.toString()} onValueChange={(val) => setSelectedAddressId(parseInt(val))}>
                 <div className="space-y-4">
                   {savedAddresses.map((address) => (
                     <div
-                      key={address.id}
+                      key={address.id_direccion}
                       className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                        selectedAddressId === address.id
+                        selectedAddressId === address.id_direccion
                           ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md'
                           : 'border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50/50'
                       }`}
-                      onClick={() => setSelectedAddressId(address.id)}
+                      onClick={() => setSelectedAddressId(address.id_direccion)}
                     >
                       <div className="flex items-start gap-3">
-                        <RadioGroupItem value={address.id.toString()} id={`address-${address.id}`} />
+                        <RadioGroupItem value={address.id_direccion.toString()} id={`address-${address.id_direccion}`} />
                         <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
                           <MapPin className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-emerald-900">{address.name}</h4>
-                            {address.isDefault && (
+                            <h4 className="font-semibold text-emerald-900">{address.alias}</h4>
+                            {address.es_predeterminada && (
                               <span className="text-xs bg-emerald-500 text-white px-2 py-1 rounded-full">
                                 Predeterminada
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-700 mt-1">{address.address}</p>
+                          <p className="text-sm text-gray-700 mt-1">
+                            {address.calle_numero}, {address.ciudad}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -197,6 +281,7 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
         </>
       )}
 
+      {/* Lógica de "Agregar Nueva" (¡con las clases BIEN!) */}
       {showAddNew && (
         <Card className="border-2 border-emerald-100 shadow-lg">
           <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
@@ -205,75 +290,58 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
           <CardContent className="p-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Nombre de la Dirección *</Label>
+                <Label htmlFor="alias">Alias de la Dirección *</Label>
                 <Input
-                  id="name"
+                  id="alias"
                   placeholder="Ej: Casa, Trabajo"
-                  value={newAddress.name}
-                  onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                  className={formErrors.name ? 'border-red-500' : 'border-emerald-200'}
+                  value={newAddress.alias}
+                  onChange={(e) => setNewAddress({ ...newAddress, alias: e.target.value })}
+                  className={formErrors.alias ? 'border-red-500' : 'border-emerald-200'}
                 />
-                {formErrors.name && <p className="text-sm text-red-600 mt-1">{formErrors.name}</p>}
+                {formErrors.alias && <p className="text-sm text-red-600 mt-1">{formErrors.alias}</p>}
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="street">Calle *</Label>
-                  <Input
-                    id="street"
-                    placeholder="Av. Corrientes"
-                    value={newAddress.street}
-                    onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                    className={formErrors.street ? 'border-red-500' : 'border-emerald-200'}
-                  />
-                  {formErrors.street && <p className="text-sm text-red-600 mt-1">{formErrors.street}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="number">Número *</Label>
-                  <Input
-                    id="number"
-                    placeholder="1234"
-                    value={newAddress.number}
-                    onChange={(e) => setNewAddress({ ...newAddress, number: e.target.value })}
-                    className={formErrors.number ? 'border-red-500' : 'border-emerald-200'}
-                  />
-                  {formErrors.number && <p className="text-sm text-red-600 mt-1">{formErrors.number}</p>}
-                </div>
+              <div>
+                <Label htmlFor="calle_numero">Calle y Número *</Label>
+                <Input
+                  id="calle_numero"
+                  placeholder="Calle 7 N° 822"
+                  value={newAddress.calle_numero}
+                  onChange={(e) => setNewAddress({ ...newAddress, calle_numero: e.target.value })}
+                  className={formErrors.calle_numero ? 'border-red-500' : 'border-emerald-200'}
+                />
+                {formErrors.calle_numero && <p className="text-sm text-red-600 mt-1">{formErrors.calle_numero}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="city">Ciudad *</Label>
+                  <Label htmlFor="ciudad">Ciudad *</Label>
                   <Input
-                    id="city"
+                    id="ciudad"
                     placeholder="La Plata"
-                    value={newAddress.city}
-                    onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                    className={formErrors.city ? 'border-red-500' : 'border-emerald-200'}
+                    value={newAddress.ciudad}
+                    onChange={(e) => setNewAddress({ ...newAddress, ciudad: e.target.value })}
+                    className={formErrors.ciudad ? 'border-red-500' : 'border-emerald-200'}
                   />
-                  {formErrors.city && <p className="text-sm text-red-600 mt-1">{formErrors.city}</p>}
+                  {formErrors.ciudad && <p className="text-sm text-red-600 mt-1">{formErrors.ciudad}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="province">Provincia *</Label>
+                  <Label htmlFor="provincia">Provincia *</Label>
                   <Input
-                    id="province"
+                    id="provincia"
                     placeholder="Buenos Aires"
-                    value={newAddress.province}
-                    onChange={(e) => setNewAddress({ ...newAddress, province: e.target.value })}
-                    className={formErrors.province ? 'border-red-500' : 'border-emerald-200'}
+                    value={newAddress.provincia}
+                    onChange={(e) => setNewAddress({ ...newAddress, provincia: e.target.value })}
+                    className={formErrors.provincia ? 'border-red-500' : 'border-emerald-200'}
                   />
-                  {formErrors.province && <p className="text-sm text-red-600 mt-1">{formErrors.province}</p>}
+                  {formErrors.provincia && <p className="text-sm text-red-600 mt-1">{formErrors.provincia}</p>}
                 </div>
               </div>
 
               <div className="flex gap-3 pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setShowAddNew(false);
-                    setNewAddress({ name: "", street: "", number: "", city: "", province: "" });
-                    setFormErrors({});
-                  }}
+                  onClick={() => { setShowAddNew(false); setFormErrors({}); }}
                   className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
                 >
                   Cancelar
@@ -290,7 +358,7 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
         </Card>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Buttons (¡con las clases BIEN!) */}
       {!showAddNew && (
         <div className="flex gap-4 justify-end">
           <Button
@@ -302,7 +370,7 @@ export function CheckoutAddressScreen({ onContinue, onBack }: CheckoutAddressScr
           </Button>
           <Button
             onClick={handleContinue}
-            disabled={savedAddresses.length === 0}
+            disabled={savedAddresses.length === 0 || !selectedAddressId}
             className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
           >
             Continuar al Pago

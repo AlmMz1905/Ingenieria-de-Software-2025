@@ -56,6 +56,8 @@ class Cliente(Usuario):
     # Sacamos la 'relationship' a 'Usuario'
     recetas = relationship("Receta", back_populates="cliente", cascade="all, delete-orphan")
     pedidos = relationship("Pedido", back_populates="cliente", cascade="all, delete-orphan")
+    direcciones = relationship("Direccion", back_populates="cliente", cascade="all, delete-orphan")
+    metodos_de_pago = relationship("MetodoDePago", back_populates="cliente", cascade="all, delete-orphan")
     
     __mapper_args__ = {
         "polymorphic_identity": "cliente",
@@ -165,7 +167,7 @@ class Pedido(Base):
     farmacia = relationship("Farmacia", back_populates="pedidos")
     detalles = relationship("DetallePedido", back_populates="pedido", cascade="all, delete-orphan")
     medicamentos = relationship("Medicamento", secondary=order_medication_association, back_populates="pedidos")
-
+    
 class DetallePedido(Base):
     __tablename__ = "detalle_pedidos"
     
@@ -177,3 +179,28 @@ class DetallePedido(Base):
     
     # Relationships
     pedido = relationship("Pedido", back_populates="detalles")
+class Direccion(Base):
+    __tablename__ = "direcciones"
+    
+    id_direccion = Column(Integer, primary_key=True, index=True)
+    id_cliente = Column(Integer, ForeignKey("clientes.id_usuario"), nullable=False, index=True)
+    alias = Column(String(100), nullable=False) # Ej: "Casa", "Trabajo"
+    calle_numero = Column(String(255), nullable=False) # Ej: "Calle Falsa 123"
+    ciudad = Column(String(100), nullable=False) # Ej: "La Plata"
+    provincia = Column(String(100), nullable=False) # Ej: "Buenos Aires"
+    codigo_postal = Column(String(20), nullable=True)
+    es_predeterminada = Column(Boolean, default=False)
+    
+    cliente = relationship("Cliente", back_populates="direcciones")
+
+class MetodoDePago(Base):
+    __tablename__ = "metodos_de_pago"  
+    id_metodo_pago = Column(Integer, primary_key=True, index=True)
+    id_cliente = Column(Integer, ForeignKey("clientes.id_usuario"), nullable=False, index=True)
+    tipo = Column(String(50), nullable=False) # Ej: "Visa", "Mastercard"
+    ultimos_cuatro = Column(String(4), nullable=False) # Ej: "4242"
+    fecha_expiracion = Column(String(7), nullable=False) # Ej: "12/26" (MM/YY)
+    nombre_titular = Column(String(150), nullable=False)
+    es_predeterminado = Column(Boolean, default=False)
+
+    cliente = relationship("Cliente", back_populates="metodos_de_pago")

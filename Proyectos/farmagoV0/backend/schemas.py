@@ -28,6 +28,13 @@ class ClienteResponse(UsuarioResponse):
     dni: str
     fecha_nacimiento: Optional[date]
     obra_social: Optional[str]
+    
+    # ¡NUEVO! Le decimos que incluya las listas (¡vacías o llenas!)
+    direcciones: List['DireccionResponse'] = []
+    metodos_de_pago: List['MetodoDePagoResponse'] = []
+
+    class Config:
+        from_attributes = True # Esto hace la magia de cargar las relationships
 
 class FarmaciaCreate(UsuarioCreate):
     nombre_comercial: str
@@ -128,3 +135,61 @@ class TokenResponse(BaseModel):
     token_type: str
     usuario_id: int
     tipo_usuario: str
+
+class DireccionBase(BaseModel):
+    alias: str
+    calle_numero: str
+    ciudad: str
+    provincia: str
+    codigo_postal: Optional[str] = None
+    es_predeterminada: bool = False
+
+class DireccionCreate(DireccionBase):
+    pass # No necesita nada extra, el id_cliente lo sacamos del token
+
+class DireccionResponse(DireccionBase):
+    id_direccion: int
+    id_cliente: int
+    
+    class Config:
+        from_attributes = True
+
+# --- Schemas para Métodos de Pago ---
+
+class MetodoDePagoBase(BaseModel):
+    tipo: str
+    ultimos_cuatro: str
+    fecha_expiracion: str # Formato "MM/YY"
+    nombre_titular: str
+    es_predeterminado: bool = False
+
+class MetodoDePagoCreate(MetodoDePagoBase):
+    pass # Idem DireccionCreate
+
+class MetodoDePagoResponse(MetodoDePagoBase):
+    id_metodo_pago: int
+    id_cliente: int
+    
+    class Config:
+        from_attributes = True
+
+# --- Schemas para "Mi Perfil" ---
+
+class ClienteUpdate(BaseModel):
+    # Campos que el usuario PUEDE cambiar de su perfil
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    email: Optional[EmailStr] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None # Esta es la dirección 'principal' del Usuario, no la de entrega
+    dni: Optional[str] = None
+    fecha_nacimiento: Optional[date] = None
+    obra_social: Optional[str] = None
+
+class ChangePasswordRequest(BaseModel):
+    contraseña_actual: str
+    nueva_contraseña: str
+
+ClienteResponse.model_rebuild()
+DireccionResponse.model_rebuild()
+MetodoDePagoResponse.model_rebuild()
