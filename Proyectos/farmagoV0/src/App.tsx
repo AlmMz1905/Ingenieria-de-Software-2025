@@ -37,13 +37,12 @@ import { type MedicamentoConStock } from "./components/StockManagementScreen";
 export interface CartItem extends MedicamentoConStock {
   quantity: number;
 }
-// --- ¡CAMBIO! ¡Actualizamos la "forma" del Pedido! ---
 export interface Order {
   id_pedido: number;
   fecha_pedido: string;
   total: number;
   estado: string;
-  metodo_pago: string; // ¡Para el pop-up!
+  metodo_pago: string; 
   detalles?: {
     cantidad: number;
     precio_unitario: number;
@@ -52,7 +51,6 @@ export interface Order {
     }
   }[];
 }
-// --- FIN DEL CAMBIO ---
 
 type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
@@ -76,6 +74,9 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   
+  // (El 'selectedOrderId' que me faltaba)
+  const [selectedOrderId, setSelectedOrderId] = useState<string>("");
+
   // ... (handleLogin, handleRegister, etc. igual que antes) ...
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
@@ -131,7 +132,7 @@ export default function App() {
   };
 
 
-  // --- (handleConfirmPayment, ahora con el HACK) ---
+  // --- (handleConfirmPayment, igual que antes) ---
   const handleConfirmPayment = async (paymentMethodId: number, total: number) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem("authToken");
@@ -141,7 +142,6 @@ export default function App() {
       return;
     }
 
-    // ¡HACK! Asumimos que "1" es "Visa", "2" es "Mastercard", "3" es "Efectivo"
     const metodoPago = paymentMethodId === 3 ? "efectivo" : "tarjeta";
 
     const detalles = cart.map(item => ({
@@ -174,9 +174,6 @@ export default function App() {
 
       const newOrderData: Order = await response.json(); 
       
-      // --- ¡¡¡EL HACK MÁGICO!!! ---
-      // ¡"Grapamos" los detalles del carrito al pedido nuevo!
-      // (Porque el backend es un vago y no nos los devuelve)
       newOrderData.detalles = cart.map(cartItem => ({
         cantidad: cartItem.quantity,
         precio_unitario: cartItem.precio || 0,
@@ -184,9 +181,10 @@ export default function App() {
           nombre_comercial: cartItem.nombre_comercial
         }
       }));
-      // --- FIN DEL HACK ---
+      newOrderData.fecha_pedido = new Date().toISOString(); 
+      newOrderData.estado = "pendiente"; 
+      newOrderData.metodo_pago = metodoPago;
       
-      // (Actualizamos el stock, igual que antes)
       setStockItems(prevStock => {
         let newStock = [...prevStock];
         cart.forEach(cartItem => {
@@ -240,7 +238,6 @@ export default function App() {
   };
   const handleProceedToCheckout = () => {
     setActiveSection("checkout-address");
-    setCheckoutStep("address");
   };
   const handleNavigateToOrderDetail = (orderId: string) => {
     setSelectedOrderId(orderId);
@@ -255,16 +252,20 @@ export default function App() {
   };
 
   const renderContent = () => {
-    // (Farmacia, igual que antes)
+    // --- ¡¡¡CAMBIO CLAVE!!! ¡"Enchufamos" todos los 'onNavigate'! ---
     if (userType === "empleado") {
-      // ... (código de farmacia igual) ...
       switch (activeSection) {
         case "home":
           return <PharmacyDashboard onNavigate={setActiveSection} />;
         case "uploaded-recipes":
-          return <UploadedRecipesScreen />;
+          return <UploadedRecipesScreen onNavigate={setActiveSection} />;
         case "order-management":
-          return <OrderManagementScreen onNavigateToDetail={handleNavigateToOrderDetail} />;
+          return (
+            <OrderManagementScreen 
+              onNavigateToDetail={handleNavigateToOrderDetail} 
+              onNavigate={setActiveSection}
+            />
+          );
         case "order-detail":
           return (
             <OrderDetailScreen 
@@ -281,17 +282,17 @@ export default function App() {
             />
           );
         case "pharmacy-ratings":
-          return <PharmacyRatingsScreen />;
+          return <PharmacyRatingsScreen onNavigate={setActiveSection} />;
         case "settings":
-          return <PharmacySettingsScreen />;
+          return <PharmacySettingsScreen onNavigate={setActiveSection} />;
         default:
           return <PharmacyDashboard onNavigate={setActiveSection} />;
       }
     }
+    // --- FIN DEL CAMBIO ---
 
     // (Cliente, igual que antes)
     switch (activeSection) {
-      // ... (home, sales, catalog igual) ...
       case "home":
         return <DashboardScreen onNavigate={setActiveSection} />;
       case "sales":
@@ -314,13 +315,11 @@ export default function App() {
         );
         
       case "checkout-address":
-        // --- ¡¡¡CAMBIO CLAVE!!! ¡Arreglamos el cálculo del IVA! ---
-        // (Según tu regla nueva: "IVA está incluido")
+        // (Checkout, igual que antes)
         const total = cart.reduce((sum, item) => sum + (item.quantity * (item.precio || 0)), 0);
-        const subtotal = total / 1.21; // ¡Subtotal es el Neto!
-        const iva = total - subtotal;   // ¡IVA es la diferencia!
+        const subtotal = total / 1.21; 
+        const iva = total - subtotal;   
         const deliveryFee = 0;
-        // --- FIN DEL CAMBIO ---
         
         return checkoutStep === "address" ? (
           <CheckoutAddressScreen onContinue={handleContinueToPayment} onBack={handleBackToCart} />
@@ -330,7 +329,6 @@ export default function App() {
             onBack={handleBackToAddress}
             orderTotal={total}
             deliveryFee={deliveryFee}
-            // ¡Le pasamos los datos nuevos!
             subtotal={subtotal}
             iva={iva}
           />
@@ -343,16 +341,15 @@ export default function App() {
         );
         
       case "products":
-        // --- ¡CAMBIO! ¡Le pasamos el estado "global" de pedidos! ---
         return (
           <RecipesScreen 
             orders={orders}
             setOrders={setOrders}
           />
         );
+        
       case "upload-recipe":
         return <UploadRecipeScreen />;
-      // ... (resto igual) ...
       case "inventory":
         return <MapScreenCustomer />;
       case "reviews":
