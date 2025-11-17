@@ -82,41 +82,44 @@ def register_cliente(data: RegisterClienteRequest, db: Session = Depends(get_db)
         )
     
     hashed_password = hash_password(data.password)
-    new_usuario = Usuario(
+    
+    # --- ¡CAMBIO CLAVE! ---
+    # ¡Creamos UN SOLO objeto Cliente con TODOS los datos!
+    new_cliente = Cliente(
+        # Campos de Usuario (el "Padre")
         nombre=data.nombre,
         apellido=data.apellido,
         email=data.email,
         contraseña=hashed_password,
         telefono=data.telefono,
         direccion=data.direccion,
-        tipo_usuario="cliente"
-    )
-    db.add(new_usuario)
-    db.flush()
-    
-    new_cliente = Cliente(
-        id_usuario=new_usuario.id_usuario,
+        # tipo_usuario="cliente", # SQLAlchemy lo sabe por la herencia
+        
+        # Campos de Cliente (el "Hijo")
         dni=data.dni,
         fecha_nacimiento=None,
         obra_social=None
     )
+    
+    # ¡Borramos la lógica vieja de 'new_usuario' y 'new_cliente' separados!
     db.add(new_cliente)
     db.commit()
-    db.refresh(new_usuario)
+    db.refresh(new_cliente) # ¡Refrescamos el objeto que SÍ creamos!
     
-    access_token = create_access_token({"sub": str(new_usuario.id_usuario), "tipo": "cliente"})
+    # ¡El resto del código ahora usa 'new_cliente' en vez de 'new_usuario'!
+    access_token = create_access_token({"sub": str(new_cliente.id_usuario), "tipo": "cliente"})
     user_data = {
-        "id": new_usuario.id_usuario,
-        "email": new_usuario.email,
-        "nombre": new_usuario.nombre,
-        "apellido": new_usuario.apellido,
+        "id": new_cliente.id_usuario,
+        "email": new_cliente.email,
+        "nombre": new_cliente.nombre,
+        "apellido": new_cliente.apellido,
         "user_type": "cliente"
     }
     
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user_id": new_usuario.id_usuario,
+        "user_id": new_cliente.id_usuario,
         "user_type": "cliente",
         "user": user_data
     }
@@ -132,20 +135,20 @@ def register_farmacia(data: RegisterFarmaciaRequest, db: Session = Depends(get_d
         )
     
     hashed_password = hash_password(data.password)
-    new_usuario = Usuario(
+    
+    # --- ¡CAMBIO CLAVE! ---
+    # ¡Creamos UN SOLO objeto Farmacia con TODOS los datos!
+    new_farmacia = Farmacia(
+        # Campos de Usuario (el "Padre")
         nombre=data.nombre,
         apellido=data.apellido,
         email=data.email,
         contraseña=hashed_password,
         telefono=data.telefono,
         direccion=data.direccion,
-        tipo_usuario="farmacia"
-    )
-    db.add(new_usuario)
-    db.flush()
-    
-    new_farmacia = Farmacia(
-        id_usuario=new_usuario.id_usuario,
+        # tipo_usuario="farmacia", # SQLAlchemy lo sabe
+        
+        # Campos de Farmacia (el "Hijo")
         nombre_comercial=data.nombre_comercial,
         cuit=data.cuit,
         horario_apertura=data.horario_apertura,
@@ -153,23 +156,26 @@ def register_farmacia(data: RegisterFarmaciaRequest, db: Session = Depends(get_d
         latitud=data.latitud,
         longitud=data.longitud
     )
+    
+    # ¡Borramos la lógica vieja!
     db.add(new_farmacia)
     db.commit()
-    db.refresh(new_usuario)
+    db.refresh(new_farmacia) # ¡Refrescamos el objeto que SÍ creamos!
     
-    access_token = create_access_token({"sub": str(new_usuario.id_usuario), "tipo": "farmacia"})
+    # ¡El resto del código ahora usa 'new_farmacia'!
+    access_token = create_access_token({"sub": str(new_farmacia.id_usuario), "tipo": "farmacia"})
     user_data = {
-        "id": new_usuario.id_usuario,
-        "email": new_usuario.email,
-        "nombre": new_usuario.nombre,
-        "apellido": new_usuario.apellido,
+        "id": new_farmacia.id_usuario,
+        "email": new_farmacia.email,
+        "nombre": new_farmacia.nombre,
+        "apellido": new_farmacia.apellido,
         "user_type": "farmacia"
     }
     
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user_id": new_usuario.id_usuario,
+        "user_id": new_farmacia.id_usuario,
         "user_type": "farmacia",
         "user": user_data
     }

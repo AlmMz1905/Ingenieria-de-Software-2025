@@ -52,7 +52,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
     }
 
     try {
-      const response = await fetch(`${apiUrl}/auth/login`, {
+      const response = await fetch(`${apiUrl}/auth/login/`, { // <-- ¡Le agregué la barra '/' por las dudas!
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,15 +63,30 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
         }),
       });
 
+      // ¡Si el login falla (401, 404) O es un error de validación (422)!
       if (response.status === 401 || response.status === 404) {
-         // ¡El error que vos querías!
          throw new Error("Correo electrónico o contraseña incorrectos.");
       }
       
+      // --- ¡CAMBIO! ¡"Traducimos" el error 422! ---
+      if (response.status === 422) {
+         // ¡El error de email inválido!
+         throw new Error("El formato del correo electrónico no es válido.");
+      }
+      // --- FIN DEL CAMBIO ---
+      
       if (!response.ok) {
         // Otro error del backend (como el 500)
-        const errData = await response.json();
-        throw new Error(errData.detail || `Error del servidor: ${response.status}`);
+        let errorMessage = `Error del servidor: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData && typeof errData.detail === 'string') {
+            errorMessage = errData.detail;
+          }
+        } catch (jsonError) {
+          console.warn("No se pudo parsear el error del servidor como JSON:", jsonError);
+        }
+        throw new Error(errorMessage);
       }
 
       const data: LoginResponse = await response.json();
@@ -89,9 +104,6 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
       if (err instanceof Error) {
         // Es un error normal (los que "tiramos" nosotros)
         setError(err.message);
-      } else if (typeof err === 'string') {
-        // Es un string (raro)
-        setError(err);
       } else {
         // ¡Es el [Object Object]!
         setError("Error de conexión. Revisa tu internet o inténtalo más tarde.");

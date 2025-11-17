@@ -26,7 +26,8 @@ import { StockManagementScreen } from "./components/StockManagementScreen";
 import { UsersScreen } from "./components/UsersScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
-import { VerifyAccountScreen } from "./components/VerifyAccountScreen";
+// --- ¡CAMBIO! ¡Volamos el 'VerifyAccountScreen'! ---
+// import { VerifyAccountScreen } from "./components/VerifyAccountScreen"; 
 import { AccountCreatedScreen } from "./components/AccountCreatedScreen";
 import { PasswordResetRequestScreen } from "./components/PasswordResetRequestScreen";
 import { PasswordResetEmailSentScreen } from "./components/PasswordResetEmailSentScreen";
@@ -52,7 +53,8 @@ export interface Order {
   }[];
 }
 
-type AuthView = "login" | "register" | "verify-account" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
+// --- ¡CAMBIO! ¡Volamos el 'verify-account'! ---
+type AuthView = "login" | "register" | "account-created" | "forgot-password" | "reset-email-sent" | "reset-new-password" | "app";
 type UserType = "cliente" | "empleado" | "";
 type CheckoutStep = "address" | "payment" | "confirmation";
 
@@ -63,42 +65,42 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<UserType>("");
   const [resetEmail, setResetEmail] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
+  
+  // --- ¡CAMBIO! ¡Este estado ya no lo necesitamos! ---
+  // const [registerEmail, setRegisterEmail] = useState(""); 
   
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("address");
   const [selectedAddressId, setSelectedAddressId] = useState<number>(0);
   const [orderId, setOrderId] = useState("");
   
-  // --- (Estado Globalizado, igual que antes) ---
   const [stockItems, setStockItems] = useState<MedicamentoConStock[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  
-  // (El 'selectedOrderId' que me faltaba)
   const [selectedOrderId, setSelectedOrderId] = useState<string>("");
 
-  // ... (handleLogin, handleRegister, etc. igual que antes) ...
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
     setAuthView("app");
     if (accountType === "farmacia") setUserType("empleado");
     else setUserType("cliente");
   };
-  const handleRegister = (accountType: string, email: string) => {
-    setRegisterEmail(email);
-    setUserType(accountType as UserType);
-    setAuthView("verify-account");
+
+  // --- ¡CAMBIO! ¡Simplificamos el 'handleRegister'! ---
+  // ¡Ahora solo nos manda a "Cuenta Creada"!
+  const handleRegister = (data: { email: string; userType: "cliente" | "empleado" }) => {
+    // Ya no guardamos el email, ¡vamos directo al éxito!
+    // setRegisterEmail(data.email); 
+    setUserType(data.userType);
+    setAuthView("account-created"); // ¡Directo a la pantalla de éxito!
   };
-  const handleVerifyAccount = (code: string) => {
-    console.log("Verification code:", code);
-    setAuthView("account-created");
-  };
-  const handleResendCode = () => {
-    alert("Código reenviado a " + registerEmail);
-  };
+  // --- FIN DEL CAMBIO ---
+
+  // --- ¡CAMBIO! ¡Volamos 'handleVerifyAccount' y 'handleResendCode'! ---
+  
   const handleGoToLogin = () => {
     setAuthView("login");
   };
+  
   const handleLogout = () => {
     setIsAuthenticated(false);
     setAuthView("login");
@@ -109,10 +111,14 @@ export default function App() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
   };
+
   const handleNavigate = (section: string, tab?: string) => {
     setActiveSection(section);
     if (tab && section === "settings") setSettingsTab(tab);
   };
+  
+  // ... (El resto de los handlers: Delete, Forgot, Reset, ConfirmPayment, etc.
+  //      siguen EXACTAMENTE IGUAL que en el v4.3) ...
   const handleDeleteAccount = () => {
     handleLogout();
   };
@@ -130,9 +136,6 @@ export default function App() {
   const handleBackToLogin = () => {
     setAuthView("login");
   };
-
-
-  // --- (handleConfirmPayment, igual que antes) ---
   const handleConfirmPayment = async (paymentMethodId: number, total: number) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem("authToken");
@@ -211,9 +214,6 @@ export default function App() {
       alert(`Error al crear el pedido: ${err.message}`);
     }
   };
-
-
-  // (El resto de los handlers, igual que antes)
   const handleContinueToPayment = (addressId: number) => {
     setSelectedAddressId(addressId);
     setCheckoutStep("payment");
@@ -250,6 +250,7 @@ export default function App() {
   const handleOrderComplete = (orderId: string, completionType: string) => {
     console.log(`Order ${orderId} completed via ${completionType}`);
   };
+
 
   const renderContent = () => {
     // (Farmacia, igual que antes)
@@ -371,14 +372,7 @@ export default function App() {
           onSwitchToLogin={() => setAuthView("login")}
         />
       );
-    } else if (authView === "verify-account") {
-      return (
-        <VerifyAccountScreen
-          email={registerEmail}
-          onVerify={handleVerifyAccount}
-          onResendCode={handleResendCode}
-        />
-      );
+    // --- ¡CAMBIO! ¡Volamos el 'verify-account'! ---
     } else if (authView === "account-created") {
       return (
         <AccountCreatedScreen
