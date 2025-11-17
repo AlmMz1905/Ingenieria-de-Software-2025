@@ -252,7 +252,7 @@ export default function App() {
   };
 
   const renderContent = () => {
-    // --- ¡¡¡CAMBIO CLAVE!!! ¡"Enchufamos" todos los 'onNavigate'! ---
+    // (Farmacia, igual que antes)
     if (userType === "empleado") {
       switch (activeSection) {
         case "home":
@@ -289,7 +289,6 @@ export default function App() {
           return <PharmacyDashboard onNavigate={setActiveSection} />;
       }
     }
-    // --- FIN DEL CAMBIO ---
 
     // (Cliente, igual que antes)
     switch (activeSection) {
@@ -363,17 +362,62 @@ export default function App() {
     }
   };
 
-  // (Login/Register, igual que antes)
+  // --- ¡¡¡CAMBIO CLAVE!!! ¡Le devolví la lógica que me comí! ---
   if (!isAuthenticated) {
-    // ...
+    if (authView === "register") {
+      return (
+        <RegisterScreen
+          onRegister={handleRegister}
+          onSwitchToLogin={() => setAuthView("login")}
+        />
+      );
+    } else if (authView === "verify-account") {
+      return (
+        <VerifyAccountScreen
+          email={registerEmail}
+          onVerify={handleVerifyAccount}
+          onResendCode={handleResendCode}
+        />
+      );
+    } else if (authView === "account-created") {
+      return (
+        <AccountCreatedScreen
+          onGoToLogin={handleGoToLogin}
+        />
+      );
+    } else if (authView === "forgot-password") {
+      return (
+        <PasswordResetRequestScreen
+          onSendResetLink={handleSendResetLink}
+          onBackToLogin={handleBackToLogin}
+        />
+      );
+    } else if (authView === "reset-email-sent") {
+      return (
+        <PasswordResetEmailSentScreen
+          email={resetEmail}
+          onBackToLogin={handleBackToLogin}
+        />
+      );
+    } else if (authView === "reset-new-password") {
+      return (
+        <PasswordResetNewPasswordScreen
+          onPasswordReset={handlePasswordReset}
+          onBackToLogin={handleBackToLogin}
+        />
+      );
+    }
+    // ¡El 'LoginScreen' es el 'default'!
     return (
       <LoginScreen
         onLogin={handleLogin}
         onSwitchToRegister={() => setAuthView("register")}
-        onForgotPassword={handleForgotPassword}
+        onForgotPassword={() => setAuthView("forgot-password")}
       />
     );
   }
+  // --- FIN DEL CAMBIO ---
+
 
   // (App Autenticada, igual que antes)
   return (

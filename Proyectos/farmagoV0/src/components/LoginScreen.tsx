@@ -19,12 +19,12 @@ interface LoginResponse {
   access_token: string; 
   token_type: string;
   user_id: number;
-  user_type: "cliente" | "farmacia"; // ¡El rol de verdad!
+  user_type: "cliente" | "farmacia";
   user: {
     id: number;
     email: string;
-    nombre: string; // ¡El nombre de verdad!
-    apellido: string; // ¡El apellido de verdad!
+    nombre: string;
+    apellido: string;
     user_type: "cliente" | "farmacia";
   }
 }
@@ -63,13 +63,15 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
         }),
       });
 
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 404) {
+         // ¡El error que vos querías!
          throw new Error("Correo electrónico o contraseña incorrectos.");
       }
       
       if (!response.ok) {
+        // Otro error del backend (como el 500)
         const errData = await response.json();
-        throw new Error(errData.detail || `Error ${response.status}`);
+        throw new Error(errData.detail || `Error del servidor: ${response.status}`);
       }
 
       const data: LoginResponse = await response.json();
@@ -82,8 +84,19 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
       onLogin(data.user_type); 
 
     } catch (err: any) {
+      // --- ¡¡¡CAMBIO!!! ¡El catch "Bulletproof"! ---
       console.error("Error en handleSubmit:", err);
-      setError(err.message || "Error al intentar iniciar sesión.");
+      if (err instanceof Error) {
+        // Es un error normal (los que "tiramos" nosotros)
+        setError(err.message);
+      } else if (typeof err === 'string') {
+        // Es un string (raro)
+        setError(err);
+      } else {
+        // ¡Es el [Object Object]!
+        setError("Error de conexión. Revisa tu internet o inténtalo más tarde.");
+      }
+      // --- FIN DEL CAMBIO ---
     } finally {
       setLoading(false);
     }
@@ -92,7 +105,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        {/* Logo y título principal */}
+        {/* (Logo y título, igual que antes) */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
             <img 
@@ -115,7 +128,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Mensaje de Error (si existe) */}
+              {/* (Mensaje de Error "a prueba de balas") */}
               {error && (
                 <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700">
                   <AlertTriangle className="h-4 w-4" />
@@ -123,7 +136,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                 </div>
               )}
 
-              {/* Email */}
+              {/* (Email, Password, Tipo de Cuenta, igual que antes) */}
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
                 <div className="relative">
@@ -140,8 +153,6 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                   />
                 </div>
               </div>
-
-              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
                 <div className="relative">
@@ -169,15 +180,13 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                   </button>
                 </div>
               </div>
-
-              {/* Account Type */}
               <div className="space-y-2">
                 <Label htmlFor="accountType">Tipo de Cuenta</Label>
                 <div className="relative">
                   <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
                   <Select
                     value={accountType}
-                    onValueChange={setAccountType} // <--- ¡¡¡ARREGLADO!!! (Le saqué la 'V')
+                    onValueChange={setAccountType}
                     required
                     disabled={loading}
                   >
@@ -190,10 +199,9 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                     </SelectContent>
                   </Select>
                 </div>
-                {/* --- ¡CAMBIO! ¡Volé el <p> de abajo! --- */}
               </div>
 
-              {/* Remember Me */}
+              {/* (Remember Me, Forgot Password, igual que antes) */}
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="rememberMe"
@@ -207,8 +215,6 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                   Recordar mi sesión
                 </Label>
               </div>
-
-              {/* Forgot Password */}
               <div className="flex justify-end">
                 <Button
                   type="button"
@@ -221,12 +227,12 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                 </Button>
               </div>
 
-              {/* Submit Button */}
+              {/* (Botón Submit, igual que antes) */}
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all"
                 size="lg"
-                disabled={!accountType || loading} // ¡Ahora esto va a andar!
+                disabled={!accountType || loading}
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -235,7 +241,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                 )}
               </Button>
 
-              {/* Divider */}
+              {/* (Divider y Register Link, igual que antes) */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
@@ -244,8 +250,6 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
                   <span className="px-2 bg-white text-gray-500">o</span>
                 </div>
               </div>
-
-              {/* Register Link */}
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   ¿No tenes una cuenta?{" "}
@@ -264,7 +268,7 @@ export function LoginScreen({ onLogin, onSwitchToRegister, onForgotPassword }: L
           </CardContent>
         </Card>
 
-        {/* Footer */}
+        {/* (Footer, igual que antes) */}
         <p className="text-center text-sm text-emerald-700 mt-6">
           Al continuar, aceptas nuestros{" "}
           <a href="#" className="text-emerald-600 hover:underline font-medium">
