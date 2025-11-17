@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, update
 from database import get_db
+from typing import Union
 from models import Usuario, Cliente, Farmacia, Direccion, MetodoDePago
 # ¡Importamos los schemas nuevos!
 from schemas import (
     ClienteResponse, FarmaciaResponse, 
-    ClienteUpdate, ChangePasswordRequest,
+    ClienteUpdate, ChangePasswordRequest, FarmaciaUpdate,
     DireccionResponse, DireccionCreate,
     MetodoDePagoResponse, MetodoDePagoCreate # <-- ¡Agregamos los schemas de Direccion!
 )
@@ -31,10 +32,20 @@ def get_profile(current_user: Usuario = Depends(get_current_user), db: Session =
 
 # --- UPDATE PERFIL (Ahora es más robusto y usa ClienteUpdate) ---
 @router.put("/profile", response_model=ClienteResponse | FarmaciaResponse)
-def update_profile(update_data: ClienteUpdate, current_user: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Update user profile information"""
+def update_profile(
+    update_data: Union[ClienteUpdate, FarmaciaUpdate], # <-- ¡LA MAGIA ESTÁ ACÁ!
+    current_user: Usuario = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """Update user profile information (Cliente o Farmacia)"""
     
-    # Buscamos el objeto "hijo" (Cliente o Farmacia)
+    # 1. Validamos que el tipo de data coincida con el tipo de usuario
+    if current_user.tipo_usuario == "cliente" and not isinstance(update_data, ClienteUpdate):
+        raise HTTPException(status_code=400, detail="Datos de actualización incorrectos para un cliente.")
+    if current_user.tipo_usuario == "farmacia" and not isinstance(update_data, FarmaciaUpdate):
+        raise HTTPException(status_code=400, detail="Datos de actualización incorrectos para una farmacia.")
+
+    # 2. Buscamos el objeto "hijo" (Cliente o Farmacia)
     if current_user.tipo_usuario == "cliente":
         user = db.query(Cliente).filter(Cliente.id_usuario == current_user.id_usuario).first()
     else:
@@ -43,16 +54,16 @@ def update_profile(update_data: ClienteUpdate, current_user: Usuario = Depends(g
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Verificamos si el email nuevo ya existe
+    # 3. Verificamos si el email nuevo ya existe
     if update_data.email and update_data.email != user.email:
         existing_user = db.query(Usuario).filter(Usuario.email == update_data.email).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="El email ya está en uso")
 
-    # Actualizamos los campos uno por uno (los que no son 'None')
+    # 4. Actualizamos los campos uno por uno
     update_dict = update_data.model_dump(exclude_unset=True)
     for field, value in update_dict.items():
-        if hasattr(user, field):
+        if hasattr(user, field) and value is not None:
             setattr(user, field, value)
     
     db.commit()

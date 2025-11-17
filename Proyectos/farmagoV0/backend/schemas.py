@@ -190,6 +190,19 @@ class ChangePasswordRequest(BaseModel):
     contraseña_actual: str
     nueva_contraseña: str
 
+# --- ¡NUEVO! Schema para actualizar el Perfil de Farmacia ---
+class FarmaciaUpdate(BaseModel):
+    # Campos que la farmacia PUEDE cambiar
+    nombre_comercial: Optional[str] = None
+    email: Optional[EmailStr] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None # La dirección 'principal' del Usuario
+    
+    # ¡Los campos de horario!
+    horario_apertura: Optional[str] = None # Ej: "09:00"
+    horario_cierre: Optional[str] = None # Ej: "20:00"
+
 ClienteResponse.model_rebuild()
 DireccionResponse.model_rebuild()
 MetodoDePagoResponse.model_rebuild()
+FarmaciaUpdate.model_rebuild()
