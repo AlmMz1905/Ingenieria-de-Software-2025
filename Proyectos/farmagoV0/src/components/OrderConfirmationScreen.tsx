@@ -1,4 +1,4 @@
-import { CheckCircle, Package, MapPin, Calendar, Home } from "lucide-react";
+import { CheckCircle, Package, MapPin, Calendar, Home, Heart } from "lucide-react"; // <--- ¡CAMBIO! (Agregué 'Heart')
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 
@@ -13,7 +13,7 @@ export function OrderConfirmationScreen({
   onGoToHome, 
   onGoToOrders 
 }: OrderConfirmationScreenProps) {
-  // Calculate estimated delivery date (3 business days from now)
+  // (La fecha estimada, igual que antes)
   const estimatedDate = new Date();
   estimatedDate.setDate(estimatedDate.getDate() + 3);
   const formattedDate = estimatedDate.toLocaleDateString('es-AR', { 
@@ -27,7 +27,7 @@ export function OrderConfirmationScreen({
       <div className="max-w-2xl w-full">
         <Card className="border-2 border-emerald-200 shadow-2xl">
           <CardContent className="p-12 text-center">
-            {/* Success Icon with Animation */}
+            {/* (Icono de Check, igual que antes) */}
             <div className="relative w-32 h-32 mx-auto mb-6">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full animate-pulse"></div>
               <div className="absolute inset-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-2xl">
@@ -35,26 +35,26 @@ export function OrderConfirmationScreen({
               </div>
             </div>
 
-            {/* Title */}
+            {/* (Título, igual que antes) */}
             <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
               ¡Pedido Confirmado!
             </h1>
 
-            {/* Order ID */}
+            {/* (ID del Pedido, igual que antes) */}
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-full border-2 border-emerald-200 mb-6">
               <Package className="h-5 w-5 text-emerald-600" />
               <span className="font-semibold text-emerald-900">
-                Pedido: <span className="text-emerald-600">{orderId}</span>
+                Pedido: <span className="text-emerald-600">#{orderId}</span>
               </span>
             </div>
 
-            {/* Success Message */}
+            {/* (Mensaje de Éxito, igual que antes) */}
             <p className="text-lg text-gray-700 mb-8 max-w-xl mx-auto">
               Tu pedido ha sido procesado exitosamente. Hemos enviado un correo de confirmación 
               con los detalles de tu compra.
             </p>
 
-            {/* Info Cards */}
+            {/* (Info Cards, igual que antes) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
                 <div className="flex items-center gap-3 justify-center mb-2">
@@ -79,26 +79,17 @@ export function OrderConfirmationScreen({
               </div>
             </div>
 
-            {/* Additional Info */}
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200 mb-8">
-              <h4 className="font-semibold text-blue-900 mb-2">¿Qué sigue?</h4>
-              <ul className="text-sm text-blue-800 space-y-2 text-left max-w-md mx-auto">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span>Recibirás notificaciones sobre el estado de tu pedido</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span>Puedes rastrear tu envío en tiempo real desde 'Mis Pedidos'</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <span>La farmacia preparará tu pedido y lo enviará pronto</span>
-                </li>
-              </ul>
+            {/* --- ¡¡¡CAMBIO!!! ¡Volamos el "Qué sigue?"! --- */}
+            <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200 mb-8">
+              <h4 className="font-semibold text-2xl text-emerald-900 flex items-center justify-center gap-2">
+                <Heart className="h-6 w-6 text-emerald-600" />
+                ¡Muchas gracias por tu compra!
+              </h4>
             </div>
+            {/* --- FIN DEL CAMBIO --- */}
 
-            {/* Action Buttons */}
+
+            {/* (Botones de Acción, igual que antes) */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 onClick={onGoToOrders}

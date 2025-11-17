@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { CreditCard, Plus, ChevronRight, ChevronLeft, AlertCircle, Lock } from "lucide-react";
+// --- ¡CAMBIO! ¡Agregué 'DollarSign' para el efectivo! ---
+import { CreditCard, ChevronRight, ChevronLeft, AlertCircle, Lock, DollarSign } from "lucide-react"; 
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -18,9 +19,10 @@ import {
 interface PaymentMethod {
   id: number;
   type: string;
-  lastFour: string;
-  expiryDate: string;
+  lastFour?: string; // ¡CAMBIO! (Lo hice opcional para "Efectivo")
+  expiryDate?: string; // ¡CAMBIO! (Lo hice opcional para "Efectivo")
   isDefault: boolean;
+  icon: React.ReactNode; // ¡CAMBIO! (Para meter el ícono)
 }
 
 interface CheckoutPaymentScreenProps {
@@ -36,6 +38,8 @@ export function CheckoutPaymentScreen({
   orderTotal, 
   deliveryFee 
 }: CheckoutPaymentScreenProps) {
+  
+  // --- ¡CAMBIO! ¡Agregamos "Efectivo" a la lista! ---
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     {
       id: 1,
@@ -43,6 +47,7 @@ export function CheckoutPaymentScreen({
       lastFour: "4242",
       expiryDate: "12/26",
       isDefault: true,
+      icon: <CreditCard className="h-6 w-6 text-white" />
     },
     {
       id: 2,
@@ -50,33 +55,34 @@ export function CheckoutPaymentScreen({
       lastFour: "8888",
       expiryDate: "09/25",
       isDefault: false,
+      icon: <CreditCard className="h-6 w-6 text-white" />
+    },
+    // ¡¡¡NUEVO!!!
+    {
+      id: 3,
+      type: "Efectivo",
+      isDefault: false,
+      icon: <DollarSign className="h-6 w-6 text-white" />
     },
   ]);
+  // --- FIN DEL CAMBIO ---
 
   const [selectedPaymentId, setSelectedPaymentId] = useState<number>(1);
-  const [showAddNew, setShowAddNew] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   
-  // Form for new payment method
-  const [newPayment, setNewPayment] = useState({
-    cardNumber: "",
-    cardName: "",
-    expiryDate: "",
-    cvv: "",
-  });
-
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  // --- ¡CAMBIO! ¡Volamos todo el 'useState' de 'showAddNew' y 'newPayment'! ---
+  // (Ya no necesitamos agregar tarjetas nuevas)
 
   const subtotal = orderTotal;
   const total = subtotal + deliveryFee;
 
   const handleConfirmPayment = () => {
-    // Simulate payment processing with 20% chance of failure
-    const paymentSucceeds = Math.random() > 0.2;
+    // Simulamos el pago (ya no falla, ¡que ande!)
+    const paymentSucceeds = true; 
 
     if (!paymentSucceeds) {
-      setPaymentError("Error en el pago. Por favor, verifica los datos de tu tarjeta e inténtalo nuevamente.");
+      setPaymentError("Error en el pago. Por favor, verifica los datos e inténtalo nuevamente.");
       setShowErrorDialog(true);
       return;
     }
@@ -84,71 +90,18 @@ export function CheckoutPaymentScreen({
     onConfirmPayment(selectedPaymentId);
   };
 
-  const validateNewPayment = () => {
-    const errors: {[key: string]: string} = {};
-
-    if (!newPayment.cardNumber.trim()) {
-      errors.cardNumber = "El número de tarjeta es obligatorio";
-    } else if (newPayment.cardNumber.replace(/\s/g, "").length !== 16) {
-      errors.cardNumber = "El número de tarjeta debe tener 16 dígitos";
-    }
-
-    if (!newPayment.cardName.trim()) errors.cardName = "El nombre es obligatorio";
-    
-    if (!newPayment.expiryDate.trim()) {
-      errors.expiryDate = "La fecha de vencimiento es obligatoria";
-    } else if (!/^\d{2}\/\d{2}$/.test(newPayment.expiryDate)) {
-      errors.expiryDate = "Formato inválido (MM/AA)";
-    }
-
-    if (!newPayment.cvv.trim()) {
-      errors.cvv = "El CVV es obligatorio";
-    } else if (newPayment.cvv.length !== 3) {
-      errors.cvv = "El CVV debe tener 3 dígitos";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSaveNewPayment = () => {
-    if (!validateNewPayment()) {
-      return;
-    }
-
-    const cardType = newPayment.cardNumber.startsWith("4") ? "Visa" : "Mastercard";
-    const lastFour = newPayment.cardNumber.slice(-4);
-
-    const payment: PaymentMethod = {
-      id: paymentMethods.length + 1,
-      type: cardType,
-      lastFour: lastFour,
-      expiryDate: newPayment.expiryDate,
-      isDefault: paymentMethods.length === 0,
-    };
-
-    setPaymentMethods([...paymentMethods, payment]);
-    setSelectedPaymentId(payment.id);
-    setShowAddNew(false);
-    setNewPayment({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" });
-    setFormErrors({});
-  };
-
-  const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, "");
-    const match = cleaned.match(/.{1,4}/g);
-    return match ? match.join(" ") : cleaned;
-  };
+  // --- ¡CAMBIO! ¡Volamos las funciones de 'validateNewPayment', ---
+  // 'handleSaveNewPayment' y 'formatCardNumber' (ya no sirven) ---
 
   return (
     <div className="flex-1 p-6 space-y-6 bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
-      {/* Header */}
+      {/* (Header, igual que antes) */}
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
         <h2 className="text-3xl font-semibold mb-2">Método de Pago</h2>
         <p className="text-emerald-50">Paso 2 de 2 - Confirma tu pedido y paga de forma segura</p>
       </div>
 
-      {/* Progress Indicator */}
+      {/* (Progress Indicator, igual que antes) */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -168,150 +121,54 @@ export function CheckoutPaymentScreen({
       <div className="grid grid-cols-3 gap-6">
         {/* Payment Methods Column */}
         <div className="col-span-2 space-y-6">
-          {!showAddNew && (
-            <Card className="border-2 border-emerald-100 shadow-lg">
-              <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100 flex flex-row items-center justify-between">
-                <CardTitle className="text-emerald-900">Selecciona un Método de Pago</CardTitle>
-                <Button
-                  onClick={() => setShowAddNew(true)}
-                  variant="outline"
-                  className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nueva Tarjeta
-                </Button>
-              </CardHeader>
-              <CardContent className="p-6">
-                <RadioGroup value={selectedPaymentId.toString()} onValueChange={(val) => setSelectedPaymentId(parseInt(val))}>
-                  <div className="space-y-4">
-                    {paymentMethods.map((method) => (
-                      <div
-                        key={method.id}
-                        className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                          selectedPaymentId === method.id
-                            ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md'
-                            : 'border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50/50'
-                        }`}
-                        onClick={() => setSelectedPaymentId(method.id)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <RadioGroupItem value={method.id.toString()} id={`payment-${method.id}`} />
-                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-                            <CreditCard className="h-6 w-6 text-white" />
+          {/* --- ¡CAMBIO! ¡Volamos el 'showAddNew' y el formulario! --- */}
+          <Card className="border-2 border-emerald-100 shadow-lg">
+            <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100 flex flex-row items-center justify-between">
+              <CardTitle className="text-emerald-900">Selecciona un Método de Pago</CardTitle>
+              {/* --- ¡Volamos el botón de Nueva Tarjeta! --- */}
+            </CardHeader>
+            <CardContent className="p-6">
+              <RadioGroup value={selectedPaymentId.toString()} onValueChange={(val) => setSelectedPaymentId(parseInt(val))}>
+                <div className="space-y-4">
+                  {paymentMethods.map((method) => (
+                    <div
+                      key={method.id}
+                      className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                        selectedPaymentId === method.id
+                          ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md'
+                          : 'border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50/50'
+                      }`}
+                      onClick={() => setSelectedPaymentId(method.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <RadioGroupItem value={method.id.toString()} id={`payment-${method.id}`} />
+                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                          {/* --- ¡CAMBIO! Usamos el ícono dinámico --- */}
+                          {method.icon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-emerald-900">{method.type}</h4>
+                            {method.isDefault && (
+                              <span className="text-xs bg-emerald-500 text-white px-2 py-1 rounded-full">
+                                Predeterminada
+                              </span>
+                            )}
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-semibold text-emerald-900">{method.type}</h4>
-                              {method.isDefault && (
-                                <span className="text-xs bg-emerald-500 text-white px-2 py-1 rounded-full">
-                                  Predeterminada
-                                </span>
-                              )}
-                            </div>
+                          {/* --- ¡CAMBIO! Mostramos esto solo si NO es efectivo --- */}
+                          {method.type !== "Efectivo" && (
                             <p className="text-sm text-gray-700 mt-1">
                               Termina en {method.lastFour}, expira {method.expiryDate}
                             </p>
-                          </div>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-              </CardContent>
-            </Card>
-          )}
-
-          {showAddNew && (
-            <Card className="border-2 border-emerald-100 shadow-lg">
-              <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
-                <CardTitle className="text-emerald-900">Agregar Nueva Tarjeta</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardNumber">Número de Tarjeta *</Label>
-                    <Input
-                      id="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      value={newPayment.cardNumber}
-                      onChange={(e) => {
-                        const formatted = formatCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16));
-                        setNewPayment({ ...newPayment, cardNumber: formatted });
-                      }}
-                      className={formErrors.cardNumber ? 'border-red-500' : 'border-emerald-200'}
-                    />
-                    {formErrors.cardNumber && <p className="text-sm text-red-600 mt-1">{formErrors.cardNumber}</p>}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="cardName">Nombre en la Tarjeta *</Label>
-                    <Input
-                      id="cardName"
-                      placeholder="Juan Pérez"
-                      value={newPayment.cardName}
-                      onChange={(e) => setNewPayment({ ...newPayment, cardName: e.target.value })}
-                      className={formErrors.cardName ? 'border-red-500' : 'border-emerald-200'}
-                    />
-                    {formErrors.cardName && <p className="text-sm text-red-600 mt-1">{formErrors.cardName}</p>}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="expiryDate">Vencimiento (MM/AA) *</Label>
-                      <Input
-                        id="expiryDate"
-                        placeholder="12/26"
-                        value={newPayment.expiryDate}
-                        onChange={(e) => {
-                          let value = e.target.value.replace(/\D/g, "");
-                          if (value.length >= 2) {
-                            value = value.slice(0, 2) + "/" + value.slice(2, 4);
-                          }
-                          setNewPayment({ ...newPayment, expiryDate: value });
-                        }}
-                        maxLength={5}
-                        className={formErrors.expiryDate ? 'border-red-500' : 'border-emerald-200'}
-                      />
-                      {formErrors.expiryDate && <p className="text-sm text-red-600 mt-1">{formErrors.expiryDate}</p>}
                     </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV *</Label>
-                      <Input
-                        id="cvv"
-                        placeholder="123"
-                        type="password"
-                        value={newPayment.cvv}
-                        onChange={(e) => setNewPayment({ ...newPayment, cvv: e.target.value.replace(/\D/g, "").slice(0, 3) })}
-                        maxLength={3}
-                        className={formErrors.cvv ? 'border-red-500' : 'border-emerald-200'}
-                      />
-                      {formErrors.cvv && <p className="text-sm text-red-600 mt-1">{formErrors.cvv}</p>}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowAddNew(false);
-                        setNewPayment({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" });
-                        setFormErrors({});
-                      }}
-                      className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleSaveNewPayment}
-                      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
-                    >
-                      Guardar Tarjeta
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </RadioGroup>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Order Summary Column */}
@@ -338,40 +195,31 @@ export function CheckoutPaymentScreen({
               </div>
 
               <div className="pt-4">
-                <div className="p-3 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 mb-4">
-                  <div className="flex items-center gap-2 text-emerald-800">
-                    <Lock className="h-4 w-4" />
-                    <p className="text-xs font-medium">Pago seguro y encriptado</p>
-                  </div>
-                </div>
+                {/* --- ¡CAMBIO! ¡Volamos el 'div' del "Pago Seguro"! --- */}
                 
-                {!showAddNew && (
-                  <>
-                    <Button
-                      onClick={handleConfirmPayment}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg mb-3"
-                      size="lg"
-                    >
-                      Confirmar y Pagar
-                      <ChevronRight className="h-4 w-4 ml-2" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={onBack}
-                      className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-2" />
-                      Volver
-                    </Button>
-                  </>
-                )}
+                <Button
+                  onClick={handleConfirmPayment}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg mb-3"
+                  size="lg"
+                >
+                  Confirmar y Pagar
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={onBack}
+                  className="w-full border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  Volver
+                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Payment Error Dialog */}
+      {/* (Payment Error Dialog, igual que antes) */}
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
