@@ -81,12 +81,18 @@ export function StockManagementScreen({ stockItems, setStockItems }: StockScreen
         
         const dataApi: ApiMedicamento[] = await response.json();
         
-        const dataConStock = dataApi.map(med => ({
-          ...med,
-          stock: undefined, 
-          precio: undefined,
-          minStock: 20, 
-        }));
+        const dataConStock = dataApi.map(med => {
+          // ¡Acá está la "magia" que pediste!
+          // Generamos valores "aleatorios" para la precarga
+          const stock = Math.floor(Math.random() * 80) + 5; // Stock entre 20 y 100
+          const precio = parseFloat((Math.random() * 9000 + 1500).toFixed(2)); // Precio entre 500 y 2500
+          return {
+            ...med,
+            stock: stock,
+            precio: precio,
+            minStock: 20, 
+          };
+        });
         
         // --- ¡CAMBIO! Guardamos en el estado "Padre" ---
         setStockItems(dataConStock); 
@@ -104,7 +110,7 @@ export function StockManagementScreen({ stockItems, setStockItems }: StockScreen
     } else {
       setLoading(false); // Ya los teníamos, no cargamos nada
     }
-  }, [stockItems, setStockItems]); // Dependemos del estado Padre
+  }, []); // Dependemos del estado Padre
 
   // --- ¡CAMBIO! Filtramos el estado "Padre" ---
   const filteredMedications = stockItems.filter((med) =>

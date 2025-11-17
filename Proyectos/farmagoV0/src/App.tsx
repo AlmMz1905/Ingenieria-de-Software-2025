@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "./components/ui/sonner";
 import { TopNavigation } from "./components/TopNavigation";
 import { SideNavigation } from "./components/SideNavigation";
@@ -73,11 +73,22 @@ export default function App() {
   const [selectedAddressId, setSelectedAddressId] = useState<number>(0);
   const [orderId, setOrderId] = useState("");
   
-  const [stockItems, setStockItems] = useState<MedicamentoConStock[]>([]);
+  const [stockItems, setStockItems] = useState<MedicamentoConStock[]>(() => {
+  const savedStock = localStorage.getItem("globalStock");
+  if (savedStock) {
+    return JSON.parse(savedStock); // ¡Encontramos data guardada!
+  }
+  return []; // No había nada, empezamos de cero
+  });
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string>("");
-
+  useEffect(() => {
+  // Si el stock no está vacío, lo guardamos
+  if (stockItems.length > 0) {
+    localStorage.setItem("globalStock", JSON.stringify(stockItems));
+  }
+  }, [stockItems]);
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
     setAuthView("app");
@@ -108,6 +119,8 @@ export default function App() {
     setUserType("");
     setCart([]);
     setOrders([]); 
+    setStockItems([]); // 1. Limpia el estado de React
+    localStorage.removeItem("globalStock"); // 2. Limpia la "memoria" del navegador
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
   };

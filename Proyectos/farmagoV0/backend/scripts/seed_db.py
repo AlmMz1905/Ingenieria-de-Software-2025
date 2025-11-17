@@ -71,18 +71,16 @@ def seed_database():
     pharmacies = []
     try:
         for farm_data in farmacias_data:
-            usuario = Usuario(
+            # ¡Creamos la Farmacia (hijo) directamente con todos los datos!
+            farmacia = Farmacia(
+                # Datos de Usuario (padre)
                 nombre=farm_data["nombre"],
                 apellido=farm_data["apellido"],
                 email=farm_data["email"],
                 contraseña=hash_password(farm_data["password"]),
-                tipo_usuario="farmacia"
-            )
-            db.add(usuario)
-            db.flush()
-            
-            farmacia = Farmacia(
-                id_usuario=usuario.id_usuario,
+                # tipo_usuario="farmacia", # SQLAlchemy lo sabe
+                
+                # Datos de Farmacia (hijo)
                 nombre_comercial=farm_data["nombre_comercial"],
                 cuit=farm_data["cuit"],
                 latitud=farm_data["latitud"],
@@ -93,28 +91,27 @@ def seed_database():
             db.add(farmacia)
             pharmacies.append(farmacia)
         
-        db.commit()
+        db.commit() # Guardamos todas las farmacias juntas
         
         # Create test client
-        cliente_usuario = Usuario(
+        print("Creando cliente de prueba...")
+        # ¡Creamos el Cliente (hijo) directamente con todos los datos!
+        cliente = Cliente(
+            # Datos de Usuario (padre)
             nombre="Juan",
             apellido="García",
             email="cliente@test.com",
-            contraseña=hash_password("password123"), # ¡Contraseña corta, está OK!
+            contraseña=hash_password("password123"),
             telefono="1234567890",
             direccion="Calle Falsa 123",
-            tipo_usuario="cliente"
-        )
-        db.add(cliente_usuario)
-        db.flush()
-        
-        cliente = Cliente(
-            id_usuario=cliente_usuario.id_usuario,
+            # tipo_usuario="cliente", # SQLAlchemy lo sabe
+            
+            # Datos de Cliente (hijo)
             dni="12345678",
             obra_social="OSDE"
         )
         db.add(cliente)
-        db.commit()
+        db.commit() # Guardamos el cliente
         
         # Create medications
         medicamentos_data = [

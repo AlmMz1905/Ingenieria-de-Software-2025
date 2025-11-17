@@ -43,14 +43,8 @@ export function AccountCreatedScreen({ onGoToLogin }: AccountCreatedScreenProps)
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Success Info Box */}
-            <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
-              <h4 className="font-semibold text-emerald-900 mb-2">¡Bienvenido a FarmaGo+!</h4>
-              <ul className="text-sm text-emerald-800 space-y-1">
-                <li>✓ Gestiona tus recetas médicas de forma digital</li>
-                <li>✓ Encuentra farmacias cercanas</li>
-                <li>✓ Recibe tus medicamentos en casa</li>
-                <li>✓ Consulta con farmacéuticos profesionales</li>
-              </ul>
+            <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200 text-center">
+              <h4 className="font-semibold text-emerald-900 text-lg">¡Bienvenido a FarmaGo+!</h4>
             </div>
 
             {/* Go to Login Button */}
