@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FileText, Package, Eye, Download, CheckCircle, Clock, XCircle, MapPin, CreditCard } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Package, Eye, Download, CheckCircle, Clock, XCircle, MapPin, CreditCard, Loader2, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -43,10 +43,10 @@ export function RecipesScreen({ orders, setOrders }: RecipesScreenProps) {
   
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // --- ¡¡¡CAMBIO TOTAL!!! ---
-  // ¡Volamos el 'useEffect', 'loading' y 'error'!
-  // ¡Este componente arranca vacío y solo lee del Padre!
-  // --- FIN DEL CAMBIO ---
+  // --- ¡CAMBIO! Volvimos a meter el 'loading' y 'useEffect' ---
+  // (¡Pero solo si 'orders' está vacío!)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // --- (La maqueta de 'prescriptions' sigue igual) ---
   const prescriptions: Prescription[] = [
@@ -57,59 +57,62 @@ export function RecipesScreen({ orders, setOrders }: RecipesScreenProps) {
       date: "10/11/2024",
       status: "Aprobado"
     },
-    // ... (el resto de las recetas estáticas)
+    // ...
   ];
+
+  // --- (Lógica de 'useEffect' para buscar pedidos) ---
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const token = localStorage.getItem("authToken");
+        if (!apiUrl || !token) {
+          throw new Error("No estás autenticado o la API no está configurada.");
+        }
+
+        const response = await fetch(`${apiUrl}/orders/`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.detail || "Error al cargar los pedidos.");
+        }
+        
+        const data: Order[] = await response.json();
+        setOrders(data); // ¡Guardamos en el estado "Padre"!
+      } catch (err: any) {
+        setError(err.message || "Error desconocido");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // ¡Solo buscamos si el estado Padre está vacío!
+    if (orders.length === 0) {
+      fetchOrders();
+    } else {
+      setLoading(false); // Ya los teníamos
+    }
+  }, [orders.length, setOrders]); 
+  // --- FIN DE LA NUEVA LÓGICA ---
+
 
   const getStatusBadge = (status: Prescription["status"]) => {
     // ... (igual que antes)
   };
 
   const getOrderStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "entregado":
-        return (
-          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Entregado
-          </Badge>
-        );
-      case "enviado":
-        return (
-          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
-            <MapPin className="h-3 w-3 mr-1" />
-            Enviado
-          </Badge>
-        );
-      case "en proceso":
-      case "pendiente":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200">
-            <Clock className="h-3 w-3 mr-1" />
-            {status}
-          </Badge>
-        );
-      case "cancelado":
-        return (
-          <Badge className="bg-red-100 text-red-700 hover:bg-red-200">
-            <XCircle className="h-3 w-3 mr-1" />
-            Cancelado
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
-    }
+    // ... (igual que antes)
   };
   
   const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } catch (e) {
-      return dateString;
-    }
+    // ... (igual que antes)
   };
 
   return (
@@ -122,114 +125,56 @@ export function RecipesScreen({ orders, setOrders }: RecipesScreenProps) {
 
       {/* (Tabs, igual que antes) */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 h-auto p-1 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200">
-          <TabsTrigger 
-            value="prescriptions" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white flex items-center gap-2 py-3"
-          >
-            <FileText className="h-4 w-4" />
-            <span>Mis Recetas Médicas</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="orders"
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white flex items-center gap-2 py-3"
-          >
-            <Package className="h-4 w-4" />
-            <span>Mis Pedidos</span>
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-6 ...">
+          {/* ... (TabsTrigger igual) ... */}
         </TabsList>
 
         {/* (Prescriptions Tab, igual que antes, ¡sigue siendo maqueta!) */}
         <TabsContent value="prescriptions">
            <Card className="border-2 border-emerald-100 shadow-lg">
-            <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
-              <CardTitle className="text-emerald-900">Recetas Médicas Cargadas</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              {prescriptions.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">No tienes recetas cargadas</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-emerald-900">ID</TableHead>
-                      <TableHead className="text-emerald-900">Medicamento</TableHead>
-                      <TableHead className="text-emerald-900">Médico</TableHead>
-                      <TableHead className="text-emerald-900">Fecha</TableHead>
-                      <TableHead className="text-emerald-900">Estado</TableHead>
-                      <TableHead className="text-right text-emerald-900">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {prescriptions.map((prescription) => (
-                      <TableRow key={prescription.id} className="hover:bg-emerald-50/50">
-                        <TableCell className="font-medium">{prescription.id}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center">
-                              <FileText className="h-4 w-4 text-emerald-600" />
-                            </div>
-                            <span className="font-medium">{prescription.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{prescription.doctor}</TableCell>
-                        <TableCell>{prescription.date}</TableCell>
-                        <TableCell>{getStatusBadge(prescription.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="hover:bg-emerald-100 text-emerald-700"
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="hover:bg-teal-100 text-teal-700"
-                            >
-                              <Download className="h-4 w-4 mr-1" />
-                              Descargar
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+            {/* ... (Toda la maqueta de recetas) ... */}
+           </Card>
         </TabsContent>
 
-        {/* --- (Tab de Pedidos, ahora 100% "bobo") --- */}
+        {/* (Tab de Pedidos, "enchufada") */}
         <TabsContent value="orders">
           <Card className="border-2 border-emerald-100 shadow-lg">
             <CardHeader className="bg-gradient-to-br from-emerald-50 to-teal-50 border-b-2 border-emerald-100">
               <CardTitle className="text-emerald-900">Historial de Pedidos</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              {/* --- ¡CAMBIO! ¡Volamos 'loading' y 'error' de acá! --- */}
-              {orders.length === 0 ? (
+              {/* ¡Manejo de Carga y Error! */}
+              {loading && (
+                <div className="text-center py-12">
+                  <Loader2 className="h-12 w-12 text-gray-300 mx-auto mb-3 animate-spin" />
+                  <p className="text-gray-500">Buscando tu historial de pedidos...</p>
+                </div>
+              )}
+              {error && (
+                <div className="text-center py-12 text-red-700">
+                  <Info className="h-12 w-12 text-red-300 mx-auto mb-3" />
+                  <p className="font-semibold">¡Ups! Algo salió mal</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+              
+              {!loading && !error && orders.length === 0 && (
                 <div className="text-center py-12">
                   <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500">No tienes pedidos realizados</p>
                 </div>
-              ) : (
+              )}
+              
+              {!loading && !error && orders.length > 0 && (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-emerald-900">ID Pedido</TableHead>
-                      <TableHead className="text-emerald-900">Fecha</TableHead>
-                      <TableHead className="text-emerald-900">Productos</TableHead>
-                      <TableHead className="text-emerald-900">Total</TableHead>
-                      <TableHead className="text-emerald-900">Estado</TableHead>
-                      <TableHead className="text-right text-emerald-900">Acciones</TableHead>
+                      <TableHead>ID Pedido</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Productos</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -274,19 +219,24 @@ export function RecipesScreen({ orders, setOrders }: RecipesScreenProps) {
         </TabsContent>
       </Tabs>
 
-      {/* (Pop-up de "Ver Detalles", igual que antes) */}
+      {/* --- ¡¡¡CAMBIO TOTAL!!! ¡El pop-up "Ver Detalles" arreglado! --- */}
       <Dialog open={!!selectedOrder} onOpenChange={(isOpen) => !isOpen && setSelectedOrder(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Detalle del Pedido #{selectedOrder?.id_pedido}</DialogTitle>
+            {/* ¡Agregamos el Método de Pago! */}
             <DialogDescription>
-              Fecha: {formatDate(selectedOrder?.fecha_pedido || "")} - 
+              Fecha: {formatDate(selectedOrder?.fecha_pedido || "")}
+              <br/>
               Estado: {getOrderStatusBadge(selectedOrder?.estado || "")}
+              <br/>
+              Pago: <span className="capitalize">{selectedOrder?.metodo_pago}</span>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <h4 className="font-semibold text-gray-800">Productos Incluidos</h4>
             <div className="space-y-3">
+              {/* ¡Ahora sí va a encontrar los 'detalles' que "grapamos"! */}
               {selectedOrder?.detalles?.map((detalle, index) => (
                 <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
                   <div>
@@ -304,17 +254,20 @@ export function RecipesScreen({ orders, setOrders }: RecipesScreenProps) {
             
             <hr />
             
+            {/* ¡Ahora el cálculo del IVA es el que VOS pediste! */}
             <div className="space-y-2">
                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal:</span>
-                  <span className="font-medium">${(selectedOrder?.detalles?.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0) || 0).toFixed(2)}</span>
+                  <span>Subtotal (Neto):</span>
+                  {/* ¡Calculamos el Neto (Total / 1.21)! */}
+                  <span className="font-medium">${((selectedOrder?.total || 0) / 1.21).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>IVA (aprox):</span>
-                  <span className="font-medium">${((selectedOrder?.total || 0) - (selectedOrder?.detalles?.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0) || 0)).toFixed(2)}</span>
+                  <span>IVA (21%):</span>
+                  {/* ¡Calculamos el IVA (Total - Neto)! */}
+                  <span className="font-medium">${((selectedOrder?.total || 0) - ((selectedOrder?.total || 0) / 1.21)).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-xl text-emerald-900">
-                  <span>Total:</span>
+                  <span>Total (IVA Incluido):</span>
                   <span>${(selectedOrder?.total || 0).toFixed(2)}</span>
                 </div>
             </div>

@@ -37,17 +37,17 @@ import { type MedicamentoConStock } from "./components/StockManagementScreen";
 export interface CartItem extends MedicamentoConStock {
   quantity: number;
 }
-// ¡OJO! ¡Esta 'interface' es una ADIVINANZA de la API!
-// ¡La vamos a usar para el estado "global" de pedidos!
+// --- ¡CAMBIO! ¡Actualizamos la "forma" del Pedido! ---
 export interface Order {
   id_pedido: number;
   fecha_pedido: string;
   total: number;
   estado: string;
+  metodo_pago: string; // ¡Para el pop-up!
   detalles?: {
     cantidad: number;
     precio_unitario: number;
-    medicamento: { // ¡Asumo que la API nos devuelve esto!
+    medicamento: { 
       nombre_comercial: string;
     }
   }[];
@@ -71,25 +71,18 @@ export default function App() {
   const [selectedAddressId, setSelectedAddressId] = useState<number>(0);
   const [orderId, setOrderId] = useState("");
   
-  // --- ¡¡¡ESTADO GLOBALIZADO!!! ---
+  // --- (Estado Globalizado, igual que antes) ---
   const [stockItems, setStockItems] = useState<MedicamentoConStock[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]); // ¡El historial "global"!
-  // --- FIN DEL CAMBIO ---
-
-
+  const [orders, setOrders] = useState<Order[]>([]);
+  
+  // ... (handleLogin, handleRegister, etc. igual que antes) ...
   const handleLogin = (accountType: string) => {
     setIsAuthenticated(true);
     setAuthView("app");
-    
-    if (accountType === "farmacia") {
-      setUserType("empleado");
-    } else {
-      setUserType("cliente");
-    }
+    if (accountType === "farmacia") setUserType("empleado");
+    else setUserType("cliente");
   };
-
-  // ... (handleRegister, handleVerifyAccount, etc. igual que antes) ...
   const handleRegister = (accountType: string, email: string) => {
     setRegisterEmail(email);
     setUserType(accountType as UserType);
@@ -105,24 +98,19 @@ export default function App() {
   const handleGoToLogin = () => {
     setAuthView("login");
   };
-  
   const handleLogout = () => {
     setIsAuthenticated(false);
     setAuthView("login");
     setActiveSection("home");
     setUserType("");
     setCart([]);
-    setOrders([]); // ¡Limpiamos los pedidos al salir!
-    // ¡NO LIMPIAMOS EL STOCK!
+    setOrders([]); 
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
   };
-
   const handleNavigate = (section: string, tab?: string) => {
     setActiveSection(section);
-    if (tab && section === "settings") {
-      setSettingsTab(tab);
-    }
+    if (tab && section === "settings") setSettingsTab(tab);
   };
   const handleDeleteAccount = () => {
     handleLogout();
@@ -135,7 +123,7 @@ export default function App() {
     setAuthView("reset-email-sent");
   };
   const handlePasswordReset = (newPassword: string) => {
-    alert("Contraseña restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.");
+    alert("Contraseña restablecida exitosamente.");
     setAuthView("login");
   };
   const handleBackToLogin = () => {
@@ -143,7 +131,7 @@ export default function App() {
   };
 
 
-  // --- (handleConfirmPayment, igual que antes) ---
+  // --- (handleConfirmPayment, ahora con el HACK) ---
   const handleConfirmPayment = async (paymentMethodId: number, total: number) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem("authToken");
@@ -152,6 +140,9 @@ export default function App() {
       alert("Error: No estás autenticado o la API no está configurada.");
       return;
     }
+
+    // ¡HACK! Asumimos que "1" es "Visa", "2" es "Mastercard", "3" es "Efectivo"
+    const metodoPago = paymentMethodId === 3 ? "efectivo" : "tarjeta";
 
     const detalles = cart.map(item => ({
       id_medicamento: item.id_medicamento,
@@ -170,7 +161,7 @@ export default function App() {
         },
         body: JSON.stringify({
           id_farmacia: HACK_FARMACIA_ID,
-          metodo_pago: "tarjeta", 
+          metodo_pago: metodoPago, 
           total: total,
           detalles: detalles
         })
@@ -181,10 +172,21 @@ export default function App() {
         throw new Error(errData.detail || "No se pudo crear el pedido.");
       }
 
-      // ¡El backend nos devuelve el pedido nuevo!
       const newOrderData: Order = await response.json(); 
       
-      // Actualizamos el stock "en vivo"
+      // --- ¡¡¡EL HACK MÁGICO!!! ---
+      // ¡"Grapamos" los detalles del carrito al pedido nuevo!
+      // (Porque el backend es un vago y no nos los devuelve)
+      newOrderData.detalles = cart.map(cartItem => ({
+        cantidad: cartItem.quantity,
+        precio_unitario: cartItem.precio || 0,
+        medicamento: {
+          nombre_comercial: cartItem.nombre_comercial
+        }
+      }));
+      // --- FIN DEL HACK ---
+      
+      // (Actualizamos el stock, igual que antes)
       setStockItems(prevStock => {
         let newStock = [...prevStock];
         cart.forEach(cartItem => {
@@ -201,10 +203,7 @@ export default function App() {
         return newStock;
       });
 
-      // --- ¡CAMBIO! ¡Agregamos el pedido nuevo al historial "global"! ---
       setOrders(prevOrders => [newOrderData, ...prevOrders]);
-      // --- FIN DEL CAMBIO ---
-
       setCart([]);
       setOrderId(newOrderData.id_pedido.toString());
       setCheckoutStep("confirmation");
@@ -228,14 +227,10 @@ export default function App() {
   const handleBackToAddress = () => {
     setCheckoutStep("address");
   };
-
-  // --- ¡CAMBIO! ¡Este botón ahora te lleva de verdad! ---
   const handleGoToOrders = () => {
-    setActiveSection("products"); // "products" es el ID de "Mis Recetas"
-    setCheckoutStep("address"); // Reseteamos el checkout
+    setActiveSection("products"); 
+    setCheckoutStep("address");
   };
-  // --- FIN DEL CAMBIO ---
-
   const handleGoToHome = () => {
     setActiveSection("home");
     setCheckoutStep("address");
@@ -262,8 +257,8 @@ export default function App() {
   const renderContent = () => {
     // (Farmacia, igual que antes)
     if (userType === "empleado") {
+      // ... (código de farmacia igual) ...
       switch (activeSection) {
-        // ... (el resto de 'empleado' sigue igual) ...
         case "home":
           return <PharmacyDashboard onNavigate={setActiveSection} />;
         case "uploaded-recipes":
@@ -296,7 +291,7 @@ export default function App() {
 
     // (Cliente, igual que antes)
     switch (activeSection) {
-      // ... (el resto de 'cliente' sigue igual) ...
+      // ... (home, sales, catalog igual) ...
       case "home":
         return <DashboardScreen onNavigate={setActiveSection} />;
       case "sales":
@@ -317,12 +312,15 @@ export default function App() {
             setCart={setCart}
           />
         );
+        
       case "checkout-address":
-        // (Checkout, igual que antes)
-        const subtotal = cart.reduce((sum, item) => sum + (item.quantity * (item.precio || 0)), 0);
-        const tax = subtotal * 0.21;
-        const total = subtotal + tax;
+        // --- ¡¡¡CAMBIO CLAVE!!! ¡Arreglamos el cálculo del IVA! ---
+        // (Según tu regla nueva: "IVA está incluido")
+        const total = cart.reduce((sum, item) => sum + (item.quantity * (item.precio || 0)), 0);
+        const subtotal = total / 1.21; // ¡Subtotal es el Neto!
+        const iva = total - subtotal;   // ¡IVA es la diferencia!
         const deliveryFee = 0;
+        // --- FIN DEL CAMBIO ---
         
         return checkoutStep === "address" ? (
           <CheckoutAddressScreen onContinue={handleContinueToPayment} onBack={handleBackToCart} />
@@ -332,6 +330,9 @@ export default function App() {
             onBack={handleBackToAddress}
             orderTotal={total}
             deliveryFee={deliveryFee}
+            // ¡Le pasamos los datos nuevos!
+            subtotal={subtotal}
+            iva={iva}
           />
         ) : (
           <OrderConfirmationScreen 
@@ -351,6 +352,7 @@ export default function App() {
         );
       case "upload-recipe":
         return <UploadRecipeScreen />;
+      // ... (resto igual) ...
       case "inventory":
         return <MapScreenCustomer />;
       case "reviews":
